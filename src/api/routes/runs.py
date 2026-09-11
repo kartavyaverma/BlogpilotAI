@@ -1,12 +1,3 @@
-"""
-src/api/routes/runs.py
-
-Single Responsibility: HTTP request/response handling for starting a
-blog-generation run (SSE stream) and downloading its Markdown result.
-All workflow execution lives in graph/streaming.py — this module only
-validates input, starts the stream, and shapes HTTP responses.
-"""
-
 from __future__ import annotations
 
 import uuid
@@ -52,7 +43,6 @@ def run_agent(request_data: AgentRunRequest):
 
 @router.get("/runs/{run_id}/download")
 def download_markdown(run_id: str):
-    # Only allow safe run ID characters.
     safe_run_id = "".join(c for c in run_id if c.isalnum() or c in {"-", "_"})
 
     if safe_run_id != run_id:

@@ -1,10 +1,3 @@
-"""
-src/agents/orchestrator.py
-
-Single Responsibility: turn a topic (+ optional evidence) into a
-structured Plan, and fan that plan out into one Send() per worker task.
-"""
-
 from __future__ import annotations
 
 from langchain_core.messages import HumanMessage, SystemMessage

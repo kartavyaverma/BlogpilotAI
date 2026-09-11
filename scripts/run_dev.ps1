@@ -1,6 +1,3 @@
-# Run BlogPilot AI locally in development mode (autoreload).
-# Usage: .\scripts\run_dev.ps1   (run from the project root)
-
 $ErrorActionPreference = "Stop"
 
 $ProjectRoot = Split-Path -Parent $PSScriptRoot

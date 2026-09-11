@@ -1,11 +1,3 @@
-"""
-src/agents/router.py
-
-Single Responsibility: the routing decision (closed_book / hybrid /
-open_book) made before planning starts. Nothing else — not research,
-not planning.
-"""
-
 from __future__ import annotations
 
 from langchain_core.messages import HumanMessage, SystemMessage

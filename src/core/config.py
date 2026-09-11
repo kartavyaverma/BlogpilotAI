@@ -1,13 +1,3 @@
-"""
-src/core/config.py
-
-Single Responsibility: load & validate environment variables and define
-the filesystem layout (templates/static/images/outputs directories).
-
-Every other module MUST import `settings` from here instead of calling
-`os.getenv(...)` or hardcoding paths directly.
-"""
-
 from __future__ import annotations
 
 import os
@@ -16,9 +6,6 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# ---------------------------------------------------------------------------
-# Load .env once. BASE_DIR is the project root (one level above src/).
-# ---------------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(BASE_DIR / ".env")
 
@@ -39,7 +26,6 @@ def _optional(name: str, default: str = "") -> str:
 
 @dataclass(frozen=True)
 class Settings:
-    # --- LLM -------------------------------------------------------------
     openai_api_key: str = field(default_factory=lambda: _require("OPENAI_API_KEY"))
     openai_model: str = field(
         default_factory=lambda: _optional("OPENAI_MODEL", "gpt-4o-mini")
@@ -48,29 +34,24 @@ class Settings:
         default_factory=lambda: float(_optional("LLM_TEMPERATURE", "0"))
     )
 
-    # --- Research (Tavily) -------------------------------------------------
     tavily_api_key: str = field(default_factory=lambda: _optional("TAVILY_API_KEY"))
     tavily_max_results: int = field(
         default_factory=lambda: int(_optional("TAVILY_MAX_RESULTS", "6"))
     )
 
-    # --- Image generation (Gemini) -----------------------------------------
     google_api_key: str = field(default_factory=lambda: _optional("GOOGLE_API_KEY"))
     gemini_image_model: str = field(
         default_factory=lambda: _optional("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
     )
 
-    # --- Database / checkpointer -------------------------------------------
     database_url_raw: str = field(default_factory=lambda: _require("DATABASE_URL"))
 
-    # --- App server ----------------------------------------------------------
     app_host: str = field(default_factory=lambda: _optional("APP_HOST", "127.0.0.1"))
     app_port: int = field(default_factory=lambda: int(_optional("APP_PORT", "8000")))
     app_reload: bool = field(
         default_factory=lambda: _optional("APP_RELOAD", "true").lower() == "true"
     )
 
-    # --- Filesystem layout (relative to the project root, not cwd) --------
     base_dir: Path = field(default_factory=lambda: BASE_DIR)
     templates_dir: Path = field(default_factory=lambda: BASE_DIR / "src" / "templates")
     static_dir: Path = field(default_factory=lambda: BASE_DIR / "src" / "static")
@@ -79,7 +60,6 @@ class Settings:
 
     @property
     def database_url(self) -> str:
-        """DATABASE_URL with sslmode=require appended if not already present."""
         url = self.database_url_raw
         if "sslmode=" not in url:
             separator = "&" if "?" in url else "?"
@@ -91,5 +71,4 @@ class Settings:
             directory.mkdir(parents=True, exist_ok=True)
 
 
-# Module-level singleton — import this, don't instantiate Settings() yourself.
 settings = Settings()

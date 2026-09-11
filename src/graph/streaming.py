@@ -1,12 +1,3 @@
-"""
-src/graph/streaming.py
-
-Single Responsibility: run the compiled blog_graph and translate its
-LangGraph stream (including subgraph updates) into Server-Sent Events
-for the browser. This is the ONLY module the API layer should import
-graph-execution functions from — routes never touch `blog_graph` directly.
-"""
-
 from __future__ import annotations
 
 import json
@@ -22,11 +13,7 @@ from graph.builder import blog_graph
 logger = logging.getLogger("blogpilot.streaming")
 
 
-# ---------------------------------------------------------
-# Serialization helpers
-# ---------------------------------------------------------
 def make_serializable(value: Any) -> Any:
-    """Recursively convert Pydantic models and other values into JSON-compatible values."""
     if hasattr(value, "model_dump"):
         return make_serializable(value.model_dump())
 
@@ -43,7 +30,6 @@ def make_serializable(value: Any) -> Any:
 
 
 def create_sse_event(payload: dict[str, Any], event_name: str | None = None) -> str:
-    """Convert a dictionary to a Server-Sent Event message."""
     encoded_payload = json.dumps(jsonable_encoder(payload), ensure_ascii=False)
 
     lines: list[str] = []
@@ -55,16 +41,6 @@ def create_sse_event(payload: dict[str, Any], event_name: str | None = None) -> 
 
 
 def normalize_stream_chunk(chunk: Any) -> tuple[tuple[str, ...], dict[str, Any]]:
-    """
-    Normalize LangGraph streaming chunks.
-
-    With subgraphs=True, LangGraph commonly returns:
-        (namespace, update)
-    e.g. (("reducer:<task-id>",), {"merge_content": {...}})
-
-    Root graph updates may also be returned directly as dictionaries
-    depending on the LangGraph version.
-    """
     if isinstance(chunk, tuple) and len(chunk) == 2 and isinstance(chunk[1], dict):
         raw_namespace = chunk[0] or ()
         namespace = tuple(str(item) for item in raw_namespace)
@@ -77,7 +53,6 @@ def normalize_stream_chunk(chunk: Any) -> tuple[tuple[str, ...], dict[str, Any]]
 
 
 def get_plan_task_map(plan: dict[str, Any]) -> dict[int, dict[str, Any]]:
-    """Create a task lookup using each task ID."""
     task_map: dict[int, dict[str, Any]] = {}
     tasks = plan.get("tasks", [])
 
@@ -97,7 +72,6 @@ def get_plan_task_map(plan: dict[str, Any]) -> dict[int, dict[str, Any]]:
 
 
 def save_final_markdown(run_id: str, markdown: str) -> Path:
-    """Save a predictable per-run copy of the generated Markdown under outputs/<run_id>/blog.md."""
     settings.ensure_directories()
     run_directory = settings.outputs_dir / run_id
     run_directory.mkdir(parents=True, exist_ok=True)
@@ -108,25 +82,7 @@ def save_final_markdown(run_id: str, markdown: str) -> Path:
     return output_file
 
 
-# ---------------------------------------------------------
-# LangGraph streaming
-# ---------------------------------------------------------
 def stream_workflow(topic: str, run_id: str) -> Generator[str, None, None]:
-    """
-    Run the compiled blog_graph and stream observable execution updates
-    to the browser.
-
-    This exposes:
-    - node status
-    - routing decision
-    - research queries and source count
-    - structured article plan
-    - completed sections
-    - image-processing status
-    - final Markdown
-
-    It does not expose private model reasoning.
-    """
     config = {"configurable": {"thread_id": run_id}}
     workflow_input = {"topic": topic, "sections": []}
 
@@ -169,9 +125,6 @@ def stream_workflow(topic: str, run_id: str) -> Generator[str, None, None]:
                 if not isinstance(node_update, dict):
                     node_update = {}
 
-                # =================================================
-                # Router
-                # =================================================
                 if node_name == "router":
                     mode = str(node_update.get("mode", "closed_book"))
                     needs_research = bool(node_update.get("needs_research", False))
@@ -217,9 +170,6 @@ def stream_workflow(topic: str, run_id: str) -> Generator[str, None, None]:
                             }
                         )
 
-                # =================================================
-                # Research
-                # =================================================
                 elif node_name == "research":
                     evidence = node_update.get("evidence", [])
                     if not isinstance(evidence, list):
@@ -249,9 +199,6 @@ def stream_workflow(topic: str, run_id: str) -> Generator[str, None, None]:
                         }
                     )
 
-                # =================================================
-                # Orchestrator
-                # =================================================
                 elif node_name == "orchestrator":
                     plan = node_update.get("plan", {})
                     if not isinstance(plan, dict):
@@ -281,9 +228,6 @@ def stream_workflow(topic: str, run_id: str) -> Generator[str, None, None]:
                         }
                     )
 
-                # =================================================
-                # Workers
-                # =================================================
                 elif node_name == "worker":
                     sections = node_update.get("sections", [])
                     if not isinstance(sections, list):
@@ -302,7 +246,6 @@ def stream_workflow(topic: str, run_id: str) -> Generator[str, None, None]:
                         except (TypeError, ValueError):
                             continue
 
-                        # A parallel worker update should be sent once.
                         if task_id in completed_task_ids:
                             continue
 
@@ -351,9 +294,6 @@ def stream_workflow(topic: str, run_id: str) -> Generator[str, None, None]:
 
                         reducer_started_event_sent = True
 
-                # =================================================
-                # Reducer subgraph: merge
-                # =================================================
                 elif node_name == "merge_content":
                     if not reducer_started_event_sent:
                         yield create_sse_event(
@@ -377,9 +317,6 @@ def stream_workflow(topic: str, run_id: str) -> Generator[str, None, None]:
                         }
                     )
 
-                # =================================================
-                # Reducer subgraph: image plan
-                # =================================================
                 elif node_name == "decide_images":
                     image_specs = node_update.get("image_specs", [])
                     if not isinstance(image_specs, list):
@@ -402,9 +339,6 @@ def stream_workflow(topic: str, run_id: str) -> Generator[str, None, None]:
                         }
                     )
 
-                # =================================================
-                # Reducer subgraph: image generation and final text
-                # =================================================
                 elif node_name == "generate_and_place_images":
                     generated_final = node_update.get("final")
                     if generated_final:
@@ -420,18 +354,11 @@ def stream_workflow(topic: str, run_id: str) -> Generator[str, None, None]:
                         }
                     )
 
-                # =================================================
-                # Root reducer update
-                # =================================================
                 elif node_name == "reducer":
                     generated_final = node_update.get("final")
                     if generated_final:
                         final_markdown = str(generated_final)
 
-        # -----------------------------------------------------
-        # Retrieve the final checkpoint when the root reducer
-        # update did not contain the complete final output.
-        # -----------------------------------------------------
         if not final_markdown:
             snapshot = blog_graph.get_state(config)
             state_values = getattr(snapshot, "values", {})

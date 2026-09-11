@@ -1,11 +1,3 @@
-"""
-src/agents/research.py
-
-Single Responsibility: turn router-produced queries into a deduplicated,
-LLM-synthesized EvidencePack. Owns the Tavily search call and nothing else
-in the pipeline.
-"""
-
 from __future__ import annotations
 
 from typing import List
@@ -68,7 +60,6 @@ def research_node(state: State) -> dict:
         ]
     )
 
-    # Deduplicate by URL
     dedup = {}
     for e in pack.evidence:
         if e.url:

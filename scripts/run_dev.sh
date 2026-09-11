@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Run BlogPilot AI locally in development mode (autoreload).
-# Usage: ./scripts/run_dev.sh   (run from the project root)
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -11,7 +9,6 @@ if [ ! -d ".venv" ]; then
   python3 -m venv .venv
 fi
 
-# shellcheck disable=SC1091
 source .venv/bin/activate
 
 echo "Installing dependencies..."

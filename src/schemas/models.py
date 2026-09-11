@@ -1,11 +1,3 @@
-"""
-src/schemas/models.py
-
-Single Responsibility: define the data contracts that flow through the
-graph — the Pydantic models produced/consumed by each node, and the
-LangGraph `State` TypedDict itself. No agent logic lives here.
-"""
-
 from __future__ import annotations
 
 import operator
@@ -48,7 +40,7 @@ class Plan(BaseModel):
 class EvidenceItem(BaseModel):
     title: str
     url: str
-    published_at: Optional[str] = None  # keep if Tavily provides; DO NOT rely on it
+    published_at: Optional[str] = None
     snippet: Optional[str] = None
     source: Optional[str] = None
 
@@ -81,17 +73,14 @@ class GlobalImagePlan(BaseModel):
 class State(TypedDict):
     topic: str
 
-    # routing / research
     mode: str
     needs_research: bool
     queries: List[str]
     evidence: List[EvidenceItem]
     plan: Optional[Plan]
 
-    # workers
-    sections: Annotated[List[tuple[int, str]], operator.add]  # (task_id, section_md)
+    sections: Annotated[List[tuple[int, str]], operator.add]
 
-    # reducer/image
     merged_md: str
     md_with_placeholders: str
     image_specs: List[dict]

@@ -17,9 +17,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# app.py, and the core/schemas/agents/graph/api packages it imports,
-# all live under src/ — run uvicorn from there so `import core`,
-# `import agents`, etc. resolve without needing a src/__init__.py.
 WORKDIR /app/src
 
 EXPOSE 8000

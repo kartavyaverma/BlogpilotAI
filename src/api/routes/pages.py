@@ -1,9 +1,3 @@
-"""
-src/api/routes/pages.py
-
-Single Responsibility: serve the HTML frontend page. No business logic.
-"""
-
 from __future__ import annotations
 
 from fastapi import APIRouter, Request

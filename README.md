@@ -1,4 +1,4 @@
-# BlogPilot AI 🚀
+# BlogPilot AI
 ### Autonomous Multi-Agent Technical Blog Writing System
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -11,19 +11,19 @@
 
 ---
 
-## 🌟 Key Highlights
+## Key Highlights
 
-- **🧠 Intelligent Routing**: Dynamically classifies user prompts into *closed-book* (in-depth reasoning), *hybrid* (verification required), or *open-book* (breaking/fast-evolving topics requiring web search).
-- **🌐 Autonomous Deep Research**: Leverages **Tavily Search API** to fetch up-to-date facts, documentation, and industry benchmarks before drafting.
-- **⚡ Parallel Section Fan-Out**: The Orchestrator agent crafts a comprehensive blog outline and fans out section generation to parallel worker agents simultaneously.
-- **🎨 Reducer Subgraph & Visuals**: An editorial reducer agent stitches content seamlessly, audits the post for visual diagram opportunities, and generates technical visuals using **Google Gemini**.
-- **📡 Real-Time SSE Streaming**: Live progress events, agent status updates, and tokens stream directly to the browser interface.
-- **💾 Durable State Checkpointing**: Integrated PostgreSQL checkpointer preserves agent graph state across interrupts and execution steps.
-- **🏗 Clean Architecture**: Strictly separated concerns (Core, Schemas, Agents, Graph Topology, API Routes, and UI Assets).
+- **Intelligent Routing**: Dynamically classifies user prompts into *closed-book* (in-depth reasoning), *hybrid* (verification required), or *open-book* (breaking/fast-evolving topics requiring web search).
+- **Autonomous Deep Research**: Leverages **Tavily Search API** to fetch up-to-date facts, documentation, and industry benchmarks before drafting.
+- **Parallel Section Fan-Out**: The Orchestrator agent crafts a comprehensive blog outline and fans out section generation to parallel worker agents simultaneously.
+- **Reducer Subgraph & Visuals**: An editorial reducer agent stitches content seamlessly, audits the post for visual diagram opportunities, and generates technical visuals using **Google Gemini**.
+- **Real-Time SSE Streaming**: Live progress events, agent status updates, and tokens stream directly to the browser interface.
+- **Durable State Checkpointing**: Integrated PostgreSQL checkpointer preserves agent graph state across interrupts and execution steps.
+- **Clean Architecture**: Strictly separated concerns (Core, Schemas, Agents, Graph Topology, API Routes, and UI Assets).
 
 ---
 
-## 🏗 Architecture & Multi-Agent Flow
+## Architecture & Multi-Agent Flow
 
 The system orchestrates specialized agents in an acyclic directed graph with persistent state and dynamic subgraphs:
 
@@ -55,58 +55,58 @@ flowchart TD
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 BlogPilot-AI/
 ├── src/
-│   ├── app.py                     # FastAPI entrypoint (mounts API routers & UI)
+│   ├── app.py                     FastAPI entrypoint (mounts API routers & UI)
 │   │
 │   ├── core/
-│   │   ├── config.py              # Centralized environment settings & paths
-│   │   └── llm.py                 # LLM factory (shared client across agents)
+│   │   ├── config.py              Centralized environment settings & paths
+│   │   └── llm.py                 LLM factory (shared client across agents)
 │   │
 │   ├── schemas/
-│   │   └── models.py              # Pydantic schemas (Task, Plan, State, Evidence)
+│   │   └── models.py              Pydantic schemas (Task, Plan, State, Evidence)
 │   │
 │   ├── agents/
-│   │   ├── router.py              # Routing decision (closed/hybrid/open book)
-│   │   ├── research.py            # Tavily search query synthesis & summarization
-│   │   ├── orchestrator.py        # Section planning & worker fan-out
-│   │   ├── worker.py              # Parallel section writer
-│   │   └── reducer.py             # Merge subgraph + image decision & generation
+│   │   ├── router.py              Routing decision (closed/hybrid/open book)
+│   │   ├── research.py            Tavily search query synthesis & summarization
+│   │   ├── orchestrator.py        Section planning & worker fan-out
+│   │   ├── worker.py              Parallel section writer
+│   │   └── reducer.py             Merge subgraph + image decision & generation
 │   │
 │   ├── graph/
-│   │   ├── builder.py             # LangGraph compilation & PostgreSQL checkpointer
-│   │   └── streaming.py           # SSE streaming runner for graph execution
+│   │   ├── builder.py             LangGraph compilation & PostgreSQL checkpointer
+│   │   └── streaming.py           SSE streaming runner for graph execution
 │   │
 │   ├── api/
 │   │   └── routes/
-│   │       ├── pages.py           # GET / (Frontend UI)
-│   │       ├── health.py          # GET /api/health (Liveness check)
-│   │       └── runs.py            # POST /api/run, GET /api/runs/{id}/download
+│   │       ├── pages.py           GET / (Frontend UI)
+│   │       ├── health.py          GET /api/health (Liveness check)
+│   │       └── runs.py            POST /api/run, GET /api/runs/{id}/download
 │   │
 │   ├── templates/
-│   │   └── index.html             # Interactive frontend UI
+│   │   └── index.html             Interactive frontend UI
 │   └── static/
-│       ├── css/style.css          # Modern dark-mode styling
-│       └── js/app.js              # SSE consumer & real-time UI logic
+│       ├── css/style.css          Modern dark-mode styling
+│       └── js/app.js              SSE consumer & real-time UI logic
 │
 ├── scripts/
-│   ├── run_dev.sh                 # Linux/macOS dev launcher
-│   └── run_dev.ps1                # Windows PowerShell dev launcher
+│   ├── run_dev.sh                 Linux/macOS dev launcher
+│   └── run_dev.ps1                Windows PowerShell dev launcher
 │
 ├── tests/
-│   └── test_project_structure.py  # Architecture and integrity tests
+│   └── test_project_structure.py  Architecture and integrity tests
 │
-├── .env.example                   # Template for environment variables
-├── .gitignore                     # Git exclusion rules
-├── .dockerignore                  # Docker build exclusions
-├── Dockerfile                     # Containerization specification
-├── render.yaml                    # Production deployment blueprint for Render
-├── requirements.txt               # Pinned Python dependencies
-├── LICENSE                        # Apache 2.0 License
-└── README.md                      # Project documentation
+├── .env.example                   Template for environment variables
+├── .gitignore                     Git exclusion rules
+├── .dockerignore                  Docker build exclusions
+├── Dockerfile                     Containerization specification
+├── render.yaml                    Production deployment blueprint for Render
+├── requirements.txt               Pinned Python dependencies
+├── LICENSE                        Apache 2.0 License
+└── README.md                      Project documentation
 ```
 
 ### Separation of Concerns
@@ -123,7 +123,7 @@ BlogPilot-AI/
 
 ---
 
-## 📋 Prerequisites
+## Prerequisites
 
 - **Python**: 3.11 or higher
 - **PostgreSQL**: Required for state checkpointing (use a local instance, Docker, or managed service such as Supabase / Neon / Render Postgres)
@@ -134,7 +134,7 @@ BlogPilot-AI/
 
 ---
 
-## ⚙️ Environment Configuration
+## Environment Configuration
 
 Create a `.env` file in the project root by copying `.env.example`:
 
@@ -160,54 +160,40 @@ Configure the following variables in `.env`:
 
 ---
 
-## 🚀 Quickstart Guide
+## Quickstart Guide
 
 ### Option 1: Local Development
 
 #### Windows (PowerShell)
 ```powershell
-# 1. Clone repository and navigate to root
 git clone <your-repo-url>
 cd Blog-Writing-Refactored
 
-# 2. Create and activate virtual environment
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 
-# 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Configure environment
 Copy-Item .env.example .env
-# Edit .env with your API credentials and PostgreSQL URL
 
-# 5. Launch the application
 cd src
 uvicorn app:app --reload
-# Or run from root using: .\scripts\run_dev.ps1
 ```
 
 #### macOS / Linux
 ```bash
-# 1. Clone repository and navigate to root
 git clone <your-repo-url>
 cd Blog-Writing-Refactored
 
-# 2. Create and activate virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
 
-# 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Configure environment
 cp .env.example .env
-# Edit .env with your API credentials and PostgreSQL URL
 
-# 5. Launch the application
 cd src
 uvicorn app:app --reload
-# Or run from root using: ./scripts/run_dev.sh
 ```
 
 Once running, visit **[http://127.0.0.1:8000](http://127.0.0.1:8000)** in your browser.
@@ -217,10 +203,7 @@ Once running, visit **[http://127.0.0.1:8000](http://127.0.0.1:8000)** in your b
 ### Option 2: Docker Container
 
 ```bash
-# Build Docker image
 docker build -t blogpilot-ai .
-
-# Run container (injecting your .env configuration)
 docker run --rm -it -p 8000:8000 --env-file .env blogpilot-ai
 ```
 
@@ -239,7 +222,7 @@ This repository includes a native [`render.yaml`](render.yaml) blueprint:
 
 ---
 
-## 📡 API Reference
+## API Reference
 
 | Method | Endpoint | Description |
 |---|---|---|
@@ -252,12 +235,11 @@ This repository includes a native [`render.yaml`](render.yaml) blueprint:
 
 ---
 
-## 🧪 Testing & Validation
+## Testing & Validation
 
 The test suite validates architectural integrity, import cleanliness, syntax validity, and environment safety:
 
 ```bash
-# Run test suite
 pytest tests/
 ```
 
@@ -270,6 +252,6 @@ Tests ensure:
 
 ---
 
-## 🛡️ License
+## License
 
 This project is licensed under the **Apache License 2.0**. See the [LICENSE](LICENSE) file for complete details.

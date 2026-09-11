@@ -1,15 +1,3 @@
-"""
-tests/test_project_structure.py
-
-Basic structural checks: the expected files/packages exist, key modules
-import cleanly, and there is a single source of truth for each concern
-(no stale imports back to the old monolithic app.py/backend.py).
-
-These are intentionally lightweight "does the refactor hold together"
-checks, not full behavioral tests (those would need a live Postgres
-instance and real API keys).
-"""
-
 from __future__ import annotations
 
 import subprocess
@@ -59,7 +47,6 @@ def test_packages_have_init_files():
 
 
 def test_no_stale_imports_to_old_monolith():
-    """The old backend.py / top-level app.py no longer exist as import targets."""
     offenders = []
     for py_file in SRC_DIR.rglob("*.py"):
         text = py_file.read_text(encoding="utf-8")
@@ -70,8 +57,6 @@ def test_no_stale_imports_to_old_monolith():
 
 
 def test_source_files_compile():
-    """Every .py file under src/ is syntactically valid (py_compile), without
-    requiring API keys or a live database connection to actually import it."""
     py_files = list(SRC_DIR.rglob("*.py"))
     assert py_files, "No Python files found under src/"
 
@@ -84,7 +69,6 @@ def test_source_files_compile():
 
 
 def test_config_is_single_source_of_env_vars():
-    """No module other than core/config.py should call os.getenv directly."""
     offenders = []
     for py_file in SRC_DIR.rglob("*.py"):
         if py_file == SRC_DIR / "core" / "config.py":

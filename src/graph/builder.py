@@ -1,13 +1,3 @@
-"""
-src/graph/builder.py
-
-Single Responsibility: wire the main StateGraph together (router ->
-research? -> orchestrator -> fanout -> worker -> reducer subgraph) and
-attach the PostgreSQL checkpointer. Node implementations live in
-src/agents/*; running/streaming the compiled graph lives in
-src/graph/streaming.py.
-"""
-
 from __future__ import annotations
 
 import psycopg
@@ -58,7 +48,6 @@ def _build_checkpointer() -> PostgresSaver:
     return checkpointer
 
 
-# Built once at import time, exactly like the original project's module-level graph.
 _graph = _build_graph()
 _checkpointer = _build_checkpointer()
 blog_graph = _graph.compile(checkpointer=_checkpointer)

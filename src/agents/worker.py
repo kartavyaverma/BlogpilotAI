@@ -1,11 +1,3 @@
-"""
-src/agents/worker.py
-
-Single Responsibility: write ONE section of the blog post from its Task,
-the overall Plan, and the evidence pack. Runs in parallel, one instance
-per task (see orchestrator.fanout).
-"""
-
 from __future__ import annotations
 
 from langchain_core.messages import HumanMessage, SystemMessage
