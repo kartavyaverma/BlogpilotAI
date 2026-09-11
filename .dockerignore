@@ -1,0 +1,32 @@
+# Environments
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Version control
+.git
+.gitignore
+
+# Secrets — never bake real credentials into an image
+.env
+
+# Generated at runtime — created fresh in the container instead
+images/
+outputs/
+
+# Docs / non-runtime assets not needed at runtime
+docs/
+tests/
+scripts/
+README.md
+*.md
+LICENSE
+*.excalidraw

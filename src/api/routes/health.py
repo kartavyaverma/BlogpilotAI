@@ -1,0 +1,16 @@
+"""
+src/api/routes/health.py
+
+Single Responsibility: liveness/health reporting.
+"""
+
+from __future__ import annotations
+
+from fastapi import APIRouter
+
+router = APIRouter(prefix="/api", tags=["health"])
+
+
+@router.get("/health")
+def health_check():
+    return {"status": "ok", "workflow": "loaded"}
