@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><title>BlogPilot — Autonomous Technical Publishing</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Playfair+Display:ital,wght@0,500;0,600;1,500&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"tertiary":"#38654d","secondary-container":"#e6e2df","primary-fixed-dim":"#ffb598","on-primary-fixed-variant":"#79310f","inverse-surface":"#303031","on-tertiary-container":"#f6fff6","surface-tint":"#974724","on-tertiary-fixed":"#002112","inverse-on-surface":"#f2f0f0","surface-container":"#efeded","primary":"#944522","surface-container-low":"#f5f3f3","surface":"#fbf9f9","primary-fixed":"#ffdbce","surface-bright":"#fbf9f9","error-container":"#ffdad6","tertiary-fixed-dim":"#a1d1b4","on-secondary-fixed":"#1c1b1a","tertiary-container":"#507e65","surface-dim":"#dbdad9","on-error-container":"#93000a","primary-container":"#b35d38","on-surface-variant":"#55433c","tertiary-fixed":"#bceecf","on-primary":"#ffffff","on-primary-fixed":"#370e00","background":"#fbf9f9","on-secondary":"#ffffff","on-tertiary-fixed-variant":"#224f39","secondary":"#605e5c","surface-variant":"#e3e2e2","on-secondary-fixed-variant":"#484645","surface-container-highest":"#e3e2e2","on-tertiary":"#ffffff","outline-variant":"#dbc1b8","on-primary-container":"#fffbff","surface-container-lowest":"#ffffff","surface-container-high":"#e9e8e7","outline":"#88726b","on-background":"#1b1c1c","on-error":"#ffffff","inverse-primary":"#ffb598","secondary-fixed":"#e6e2df","on-secondary-container":"#666462","secondary-fixed-dim":"#cac6c4","on-surface":"#1b1c1c","error":"#ba1a1a"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"margin":"3rem","gutter-mobile":"1rem","margin-mobile":"1.25rem","space-xl":"2.5rem","space-sm":"0.5rem","space-lg":"1.5rem","space-md":"1rem","gutter":"1.5rem","space-xs":"0.25rem"},fontFamily:{"headline-md":["Playfair Display"],"code-md":["JetBrains Mono"],"headline-sm":["Playfair Display"],"label-sm":["JetBrains Mono"],"display-lg-mobile":["Playfair Display"],"body-lg":["Geist"],"headline-lg-mobile":["Playfair Display"],"display-lg":["Playfair Display"],"label-md":["JetBrains Mono"],"body-sm":["Geist"],"title-md":["Geist"],"body-md":["Geist"],"headline-lg":["Playfair Display"]},fontSize:{"headline-md":["28px",{"lineHeight":"36px","letterSpacing":"-0.015em","fontWeight":"500"}],"code-md":["13px",{"lineHeight":"20px","letterSpacing":"-0.01em","fontWeight":"400"}],"headline-sm":["22px",{"lineHeight":"30px","letterSpacing":"-0.01em","fontWeight":"500"}],"label-sm":["10px",{"lineHeight":"14px","letterSpacing":"0.08em","fontWeight":"600"}],"display-lg-mobile":["36px",{"lineHeight":"44px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"26px","letterSpacing":"0em","fontWeight":"400"}],"headline-lg-mobile":["28px",{"lineHeight":"36px","letterSpacing":"-0.01em","fontWeight":"600"}],"display-lg":["52px",{"lineHeight":"60px","letterSpacing":"-0.02em","fontWeight":"600"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"500"}],"body-sm":["12px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"400"}],"title-md":["18px",{"lineHeight":"26px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"22px","letterSpacing":"0em","fontWeight":"400"}],"headline-lg":["38px",{"lineHeight":"46px","letterSpacing":"-0.02em","fontWeight":"600"}]}}}};</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen flex flex-col selection:bg-primary-fixed selection:text-on-primary-fixed"><header class="fixed top-0 left-0 right-0 z-50 bg-surface border-b border-outline-variant/40"><div class="h-14 w-full px-space-lg flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><a class="flex items-baseline gap-space-xs tracking-tight group focus:outline-none" data-path="pipeline-monitor" href="#"><span class="font-headline-sm text-headline-sm text-on-surface font-semibold group-hover:text-primary transition-colors">BlogPilot</span><span class="inline-block w-1.5 h-1.5 rounded-full bg-primary mb-0.5"></span></a><span class="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded border border-outline-variant/40 bg-surface-container-low font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase">v1.4</span></div><nav class="hidden md:flex items-center p-0.5 bg-surface-container-low rounded border border-outline-variant/30" data-active-classes="bg-surface-container-high text-on-surface font-medium border border-outline-variant/60"><a aria-current="page" class="px-3 py-1 rounded transition-colors bg-surface-container-high text-on-surface font-medium border border-outline-variant/60" data-path="pipeline-monitor" href="#">Workbench</a><a class="px-3 py-1 rounded font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="runs-feed" href="#">Pipeline</a><a class="px-3 py-1 rounded font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="editorial-archive" href="#">Archive</a></nav><div class="flex items-center gap-space-md"><a class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-primary text-on-primary font-body-sm text-body-sm font-medium hover:bg-primary-container transition-colors shadow-none focus:outline-none focus:ring-1 focus:ring-primary" data-path="draft-editor" href="#"><span class="material-symbols-outlined text-[16px]">edit_square</span><span>New Article</span></a><a class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-outline-variant/40 bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors font-body-sm text-body-sm" data-path="runs-feed" href="#"><span>Runs</span><span class="inline-flex items-center justify-center px-1.5 py-0.2 rounded bg-surface-container-high font-label-sm text-label-sm font-semibold text-on-surface-variant">14</span></a><button class="hidden lg:inline-flex items-center gap-2 px-2.5 py-1 rounded border border-tertiary-fixed-dim/40 bg-tertiary-fixed/20 text-tertiary font-label-sm text-label-sm hover:bg-tertiary-fixed/30 transition-colors" type="button"><span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span><span class="tracking-wide">OPERATIONAL</span></button><a class="p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded transition-colors flex items-center justify-center" data-path="system-settings" href="#" title="Settings"><span class="material-symbols-outlined text-[20px]">tune</span></a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-14 flex-1 bg-background"><div class="flex flex-col w-full">
+<nav class="w-full bg-surface border-b border-outline-variant/30 sticky top-14 z-40 px-space-md sm:px-space-lg py-2 flex items-center justify-between gap-space-md">
+<div class="flex items-center gap-1 sm:gap-2">
+<button class="px-3 py-1.5 rounded text-body-sm font-title-md bg-surface-container-high text-on-surface transition-colors flex items-center gap-1.5 shadow-sm" id="tab-home" onclick="switchWorkspace('home')" type="button">
+<span class="material-symbols-outlined text-[16px]">edit_note</span>
+<span>Compose</span>
+</button>
+<button class="px-3 py-1.5 rounded text-body-sm font-body-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-1.5" id="tab-pipeline" onclick="switchWorkspace('pipeline')" type="button">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span>Pipeline Engine</span>
+</button>
+<button class="px-3 py-1.5 rounded text-body-sm font-body-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-1.5" id="tab-reader" onclick="switchWorkspace('reader')" type="button">
+<span class="material-symbols-outlined text-[16px]">auto_stories</span>
+<span>Reading Room</span>
+</button>
+<button class="px-3 py-1.5 rounded text-body-sm font-body-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-1.5" id="tab-runs" onclick="switchWorkspace('runs')" type="button">
+<span class="material-symbols-outlined text-[16px]">history</span>
+<span>Editorial Runs</span>
+<span class="ml-0.5 px-1.5 py-0.2 rounded bg-surface-container-highest font-label-sm text-label-sm text-on-surface-variant">14</span>
+</button>
+</div>
+<div class="flex items-center gap-2">
+<button class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-label-sm text-label-sm border border-outline-variant/30 transition-all" onclick="toggleTelemetryModal()" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span class="tracking-wider uppercase">Systems Matrix</span>
+</button>
+<button class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container-lowest hover:bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/30 transition-all" id="btn-research-trigger" onclick="toggleResearchDrawer()" type="button">
+<span class="material-symbols-outlined text-[14px]">source_notes</span>
+<span>Sources (6)</span>
+</button>
+</div>
+</nav>
+<div class="w-full flex flex-col items-center py-10 md:py-16 px-space-md sm:px-space-lg" id="view-home">
+<div class="w-full max-w-4xl flex flex-col items-center text-center mb-10">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-fixed/20 text-on-primary-fixed-variant font-label-sm text-label-sm uppercase tracking-widest mb-4">
+<span>Autonomous Technical Publishing</span>
+<span>·</span>
+<span>v1.4 Production</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight max-w-2xl mb-3">
+        Turn an idea into a technical story.
+      </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
+        Research, structure, write, and illustrate — in one disciplined editorial pipeline built for senior engineering readership.
+      </p>
+</div>
+<div class="w-full max-w-3xl bg-surface-container-lowest border border-outline-variant/50 rounded-lg p-6 sm:p-8 shadow-sm">
+<div class="flex items-center justify-between pb-3 mb-4 border-b border-outline-variant/30">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-primary">terminal</span>
+<span>Editorial Prompt Canvas</span>
+</span>
+<span class="font-label-sm text-label-sm text-secondary">ARCHIVAL COMPOSITION</span>
+</div>
+<div class="relative mb-4">
+<textarea class="w-full bg-surface-container-low/40 border border-outline-variant/40 rounded p-4 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none placeholder:text-secondary" id="article-prompt" placeholder="What architectural problem, system algorithm, or production post-mortem do you want to explore?" rows="3">How vector databases actually retrieve information: HNSW, quantization, and real-world memory trade-offs</textarea>
+</div>
+<div class="flex flex-col gap-2 mb-6">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Reference Subjects &amp; Proven Schemas:</span>
+<div class="flex flex-wrap gap-2">
+<button class="px-2.5 py-1 rounded bg-surface-container-low text-on-surface hover:bg-surface-container hover:text-primary transition-colors font-code-md text-code-md border border-outline-variant/30" onclick="setTopic(this.innerText)" type="button">
+            How vector databases actually retrieve information
+          </button>
+<button class="px-2.5 py-1 rounded bg-surface-container-low text-on-surface hover:bg-surface-container hover:text-primary transition-colors font-code-md text-code-md border border-outline-variant/30" onclick="setTopic(this.innerText)" type="button">
+            Distributed consensus without Paxos: Raft vs Viewstamped
+          </button>
+<button class="px-2.5 py-1 rounded bg-surface-container-low text-on-surface hover:bg-surface-container hover:text-primary transition-colors font-code-md text-code-md border border-outline-variant/30" onclick="setTopic(this.innerText)" type="button">
+            LSM-trees vs B-Trees under high write saturation
+          </button>
+</div>
+</div>
+<div class="pt-4 border-t border-outline-variant/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex flex-wrap items-center gap-3">
+<div class="flex items-center gap-1.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Depth:</span>
+<div class="inline-flex rounded border border-outline-variant/40 bg-surface-container-low p-0.5">
+<button class="px-2 py-0.5 font-label-sm text-label-sm rounded text-secondary hover:text-on-surface" type="button">Std</button>
+<button class="px-2 py-0.5 font-label-sm text-label-sm rounded bg-surface-container-lowest text-primary font-semibold shadow-xs" type="button">Deep</button>
+</div>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Research:</span>
+<div class="inline-flex rounded border border-outline-variant/40 bg-surface-container-low p-0.5">
+<button class="px-2 py-0.5 font-label-sm text-label-sm rounded bg-surface-container-lowest text-primary font-semibold shadow-xs" type="button">Auto</button>
+<button class="px-2 py-0.5 font-label-sm text-label-sm rounded text-secondary hover:text-on-surface" type="button">Always</button>
+<button class="px-2 py-0.5 font-label-sm text-label-sm rounded text-secondary hover:text-on-surface" type="button">Off</button>
+</div>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Visuals:</span>
+<div class="inline-flex rounded border border-outline-variant/40 bg-surface-container-low p-0.5">
+<button class="px-2 py-0.5 font-label-sm text-label-sm rounded bg-surface-container-lowest text-primary font-semibold shadow-xs" type="button">Include</button>
+<button class="px-2 py-0.5 font-label-sm text-label-sm rounded text-secondary hover:text-on-surface" type="button">Prose only</button>
+</div>
+</div>
+</div>
+<button class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded bg-primary text-on-primary font-title-md text-title-md font-medium hover:bg-primary-container transition-all active:scale-[0.99] shadow-none" onclick="startGenerationFlow()" type="button">
+<span>Start writing</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<div class="w-full max-w-3xl mt-12 pt-8 border-t border-outline-variant/30">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">The Disciplined Editorial Method</span>
+<span class="font-label-sm text-label-sm text-tertiary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span>Zero hallucinated benchmarks</span>
+</span>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+<div class="p-3 bg-surface-container-lowest border border-outline-variant/30 rounded flex flex-col">
+<span class="font-label-sm text-label-sm text-primary font-semibold mb-1">01 · UNDERSTAND</span>
+<span class="font-title-md text-title-md text-on-surface mb-0.5">Domain Core</span>
+<span class="font-body-sm text-body-sm text-secondary">Deconstructs key architecture concepts and constraints.</span>
+</div>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant/30 rounded flex flex-col">
+<span class="font-label-sm text-label-sm text-primary font-semibold mb-1">02 · RESEARCH</span>
+<span class="font-title-md text-title-md text-on-surface mb-0.5">Literature Scan</span>
+<span class="font-body-sm text-body-sm text-secondary">Fetches primary papers, benchmarks &amp; RFC implementations.</span>
+</div>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant/30 rounded flex flex-col">
+<span class="font-label-sm text-label-sm text-primary font-semibold mb-1">03 · STRUCTURE</span>
+<span class="font-title-md text-title-md text-on-surface mb-0.5">Argument Arc</span>
+<span class="font-body-sm text-body-sm text-secondary">Designs cognitive flow and diagram insertion points.</span>
+</div>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant/30 rounded flex flex-col">
+<span class="font-label-sm text-label-sm text-primary font-semibold mb-1">04 · WRITE</span>
+<span class="font-title-md text-title-md text-on-surface mb-0.5">Deep Synthesis</span>
+<span class="font-body-sm text-body-sm text-secondary">Crafts production code, nuance, and clean trade-off analysis.</span>
+</div>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant/30 rounded flex flex-col col-span-2 sm:col-span-1">
+<span class="font-label-sm text-label-sm text-primary font-semibold mb-1">05 · REFINE</span>
+<span class="font-title-md text-title-md text-on-surface mb-0.5">Fact Validation</span>
+<span class="font-body-sm text-body-sm text-secondary">Validates complexity claims, citations, and typographic rhythm.</span>
+</div>
+</div>
+</div>
+</div>
+<div class="hidden w-full px-space-md sm:px-space-lg py-6 max-w-7xl mx-auto" id="view-pipeline">
+<div class="flex flex-col lg:flex-row gap-6">
+<div class="w-full lg:w-96 shrink-0 flex flex-col gap-4">
+<div class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-5">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/30 mb-4">
+<div>
+<span class="font-label-sm text-label-sm text-primary font-semibold tracking-wider uppercase">Editorial Pipeline</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Compiling Draft</h2>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-tertiary-fixed/40 text-tertiary font-label-sm text-label-sm">ACTIVE</span>
+</div>
+<div class="space-y-4 font-body-sm text-body-sm">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-[18px] text-tertiary mt-0.5">check_circle</span>
+<div class="flex-1">
+<p class="font-medium text-on-surface">Understanding the topic</p>
+<p class="font-label-sm text-label-sm text-secondary">Extracted vector space geometry, distance metrics, ANN trees</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-[18px] text-tertiary mt-0.5">check_circle</span>
+<div class="flex-1">
+<p class="font-medium text-on-surface">Checking what needs verification</p>
+<p class="font-label-sm text-label-sm text-secondary">Verified Malkov &amp; Yashunin (2016) paper on HNSW graphs</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin mt-0.5 shrink-0"></span>
+<div class="flex-1">
+<p class="font-medium text-primary">Structuring the article</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant font-code-md">Connecting sections &amp; diagram nodes...</p>
+</div>
+</div>
+<div class="flex items-start gap-3 text-secondary">
+<span class="w-4 h-4 rounded-full border border-outline-variant/60 mt-0.5 shrink-0"></span>
+<div class="flex-1">
+<p class="font-medium">Writing sections</p>
+<p class="font-label-sm text-label-sm">Pending outline closure</p>
+</div>
+</div>
+<div class="flex items-start gap-3 text-secondary">
+<span class="w-4 h-4 rounded-full border border-outline-variant/60 mt-0.5 shrink-0"></span>
+<div class="flex-1">
+<p class="font-medium">Editorial pass &amp; verification</p>
+<p class="font-label-sm text-label-sm">Pending draft pass</p>
+</div>
+</div>
+<div class="flex items-start gap-3 text-secondary">
+<span class="w-4 h-4 rounded-full border border-outline-variant/60 mt-0.5 shrink-0"></span>
+<div class="flex-1">
+<p class="font-medium">Preparing technical visuals</p>
+<p class="font-label-sm text-label-sm">2 figures scheduled</p>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/30">
+<div class="bg-surface-container-low rounded p-3 text-on-surface-variant font-code-md text-code-md flex flex-col gap-1 border border-outline-variant/30">
+<div class="flex items-center gap-1.5 text-primary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">psychology</span>
+<span>STAGE LOG</span>
+</div>
+<p class="text-body-sm text-on-surface" id="pipeline-ticker">
+                Looking for places where a diagram would help... Identified HNSW layered graph traversal query path.
+              </p>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-4">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Literature Base</span>
+<span class="font-label-sm text-label-sm text-tertiary">6 Sources Validated</span>
+</div>
+<div class="space-y-2 text-body-sm">
+<div class="p-2 rounded bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
+<span class="font-code-md text-code-md truncate pr-2">arXiv:1603.09320 (Malkov &amp; Yashunin)</span>
+<span class="font-label-sm text-label-sm px-1 rounded bg-surface-container-high text-secondary">Paper</span>
+</div>
+<div class="p-2 rounded bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
+<span class="font-code-md text-code-md truncate pr-2">Pinecone Core Architecture Docs</span>
+<span class="font-label-sm text-label-sm px-1 rounded bg-surface-container-high text-secondary">Spec</span>
+</div>
+</div>
+<button class="w-full mt-3 py-2 rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-body-sm text-body-sm transition-colors flex items-center justify-center gap-1 border border-outline-variant/30" onclick="switchWorkspace('reader')" type="button">
+<span>Skip to Final Draft</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<div class="flex-1 bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-6 sm:p-10 relative overflow-hidden">
+<div class="flex items-center justify-between border-b border-outline-variant/30 pb-4 mb-8">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary animate-ping"></span>
+<span class="font-label-sm text-label-sm tracking-wider uppercase text-on-surface-variant font-semibold">Live Streaming Output</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-code-md text-code-md text-secondary">Draft Words: 1,480 / ~2,400</span>
+<button class="px-3 py-1 rounded bg-primary text-on-primary font-label-sm text-label-sm hover:bg-primary-container transition-colors" onclick="switchWorkspace('reader')" type="button">
+              Render Final Draft
+            </button>
+</div>
+</div>
+<div class="max-w-2xl mx-auto space-y-6">
+<div>
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-widest font-semibold">Draft in Progress</span>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mt-1">
+              How Vector Databases Actually Retrieve Information
+            </h1>
+<div class="flex items-center gap-3 mt-3 text-body-sm text-secondary font-label-sm">
+<span>Malkov Graph Analysis</span>
+<span>·</span>
+<span>Product Quantization</span>
+<span>·</span>
+<span>HNSW Layer Skipping</span>
+</div>
+</div>
+<div class="prose font-body-lg text-body-lg text-on-surface space-y-4">
+<p>
+              When a modern engineering team replaces keyword inversion indices (BM25) with vector similarity search, they often treat the index as a magical black box that translates floating-point arrays into semantic matches. In reality, brute-force k-Nearest Neighbor search over high-dimensional space suffers catastrophically from the curse of dimensionality.
+            </p>
+<blockquote class="p-4 bg-surface-container-low border-l-2 border-primary rounded-r font-headline-sm italic text-headline-sm text-on-surface-variant my-4">
+              "Exact search in 1,536 dimensions requires comparing query vectors against millions of rows: an O(N × D) computation that destroys sub-10ms latency SLAs."
+            </blockquote>
+<p>
+              To survive production workloads, systems like Pinecone, Milvus, and Qdrant abandon exact matches for Approximate Nearest Neighbors (ANN). The dominant architecture for this is the Hierarchical Navigable Small World (HNSW) graph.
+            </p>
+</div>
+<div class="my-6 p-4 rounded bg-surface-container-low border border-outline-variant/40">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm text-primary uppercase font-semibold">FIGURE 01 · SYNTHESIZED DIAGRAM</span>
+<span class="font-label-sm text-label-sm text-secondary">SVG VECTOR STREAM</span>
+</div>
+<div class="w-full h-44 bg-surface-container-lowest border border-outline-variant/30 rounded flex items-center justify-center p-4">
+<svg class="w-full h-full text-on-surface" fill="none" viewbox="0 0 600 140" xmlns="http://www.w3.org/2000/svg">
+<line stroke="currentColor" stroke-dasharray="4 4" stroke-opacity="0.3" x1="60" x2="540" y1="25" y2="25"></line>
+<line stroke="currentColor" stroke-dasharray="4 4" stroke-opacity="0.3" x1="60" x2="540" y1="70" y2="70"></line>
+<line stroke="currentColor" stroke-dasharray="4 4" stroke-opacity="0.3" x1="60" x2="540" y1="115" y2="115"></line>
+<text class="font-code-md text-[10px] fill-current opacity-60" fill="currentColor" x="15" y="28">Layer 2</text>
+<text class="font-code-md text-[10px] fill-current opacity-60" fill="currentColor" x="15" y="73">Layer 1</text>
+<text class="font-code-md text-[10px] fill-current opacity-60" fill="currentColor" x="15" y="118">Layer 0</text>
+<circle cx="80" cy="25" fill="#944522" r="7"></circle>
+<line stroke="#944522" stroke-width="2" x1="87" x2="330" y1="25" y2="25"></line>
+<circle cx="330" cy="25" fill="#944522" r="7"></circle>
+<path d="M330 32 L330 63" stroke="#944522" stroke-dasharray="2 2" stroke-width="2"></path>
+<circle cx="210" cy="70" fill="currentColor" fill-opacity="0.4" r="5"></circle>
+<circle cx="330" cy="70" fill="#944522" r="6"></circle>
+<line stroke="#944522" stroke-width="2" x1="336" x2="450" y1="70" y2="70"></line>
+<circle cx="450" cy="70" fill="#944522" r="6"></circle>
+<path d="M450 77 L450 108" stroke="#944522" stroke-dasharray="2 2" stroke-width="2"></path>
+<circle cx="120" cy="115" fill="currentColor" fill-opacity="0.3" r="4"></circle>
+<circle cx="240" cy="115" fill="currentColor" fill-opacity="0.3" r="4"></circle>
+<circle cx="370" cy="115" fill="currentColor" fill-opacity="0.3" r="4"></circle>
+<circle cx="450" cy="115" fill="#944522" r="6"></circle>
+<circle cx="490" cy="115" fill="#38654d" r="7"></circle>
+<line stroke="#38654d" stroke-width="2" x1="456" x2="483" y1="115" y2="115"></line>
+<text class="font-code-md text-[9px] fill-[#38654d] font-bold" x="495" y="132">Target Vector Match</text>
+</svg>
+</div>
+<p class="font-body-sm text-body-sm text-secondary mt-2 text-center">
+              Figure 01 — Hierarchical Navigable Small World (HNSW) Layer Skip Search: Long strides at upper layers reduce search radius exponentially before descending to dense layer 0.
+            </p>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded border border-outline-variant/30 font-code-md text-code-md">
+<div class="flex items-center justify-between text-secondary mb-2 border-b border-outline-variant/20 pb-1">
+<span>hnsw_search.rs</span>
+<span>Rust 1.76</span>
+</div>
+<pre class="text-on-surface overflow-x-auto text-[12px] leading-relaxed"><code><span class="text-primary">pub fn</span> <span class="text-tertiary">search_layer</span>(
+    &amp;self,
+    query: &amp;[f32],
+    enter_points: Vec&lt;NodeId&gt;,
+    num_candidates: usize,
+    layer: usize
+) -&gt; PriorityQueue&lt;Candidate&gt; {
+    <span class="text-secondary">// Greedy traversal prioritizing closest cosine dot products</span>
+    <span class="text-primary">let mut</span> visited = HashSet::new();
+    <span class="text-primary">let mut</span> candidates = BinaryHeap::new();
+    ...
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="hidden w-full px-space-md sm:px-space-lg py-8 max-w-7xl mx-auto" id="view-reader">
+<div class="bg-surface-container-low border border-outline-variant/40 rounded-lg p-4 sm:p-6 mb-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<span class="w-8 h-8 rounded bg-tertiary-fixed text-tertiary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">check</span>
+</span>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface">The technical draft is complete</h3>
+<p class="font-body-sm text-body-sm text-secondary">
+            Multi-agent research verified, structural integrity checked, code examples validated.
+          </p>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface-container-lowest border border-outline-variant/40 text-on-surface hover:bg-surface-container font-body-sm text-body-sm transition-colors" onclick="downloadMarkdown()" type="button">
+<span class="material-symbols-outlined text-[16px]">download</span>
+<span>Download Markdown</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-primary text-on-primary font-body-sm text-body-sm hover:bg-primary-container transition-colors" onclick="switchWorkspace('home')" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>New Article</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col lg:flex-row gap-12 justify-center">
+<main class="w-full max-w-[760px] shrink-0 font-body-lg text-body-lg text-on-surface leading-relaxed">
+<header class="mb-10 pb-8 border-b border-outline-variant/30">
+<div class="flex items-center gap-2 mb-3">
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">Systems Architecture</span>
+<span class="text-outline-variant">•</span>
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Deep Dive</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mb-4">
+            How Vector Databases Actually Retrieve Information: HNSW, Quantization, and Real-World Memory Trade-Offs
+          </h1>
+<div class="flex flex-wrap items-center gap-4 text-secondary font-label-sm text-label-sm border-t border-outline-variant/20 pt-4">
+<div class="flex items-center gap-2">
+<div class="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-on-primary text-[10px] font-bold">BP</div>
+<span class="text-on-surface font-medium">BlogPilot Editorial Engine</span>
+</div>
+<span>·</span>
+<span>8 min read</span>
+<span>·</span>
+<span>2,420 words</span>
+<span>·</span>
+<span class="text-tertiary font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span>6 Citations Verified</span>
+</span>
+</div>
+</header>
+<section class="mb-10" id="section-intro">
+<p class="mb-4">
+            Modern retrieval architectures have undergone a tectonic shift. For decades, text indexing belonged exclusively to inverted index postings lists, popularized by Lucene and Elasticsearch. However, dense vector embeddings derived from transformer models represent data not through tokens, but through coordinates in high-dimensional Hilbert spaces ($D \in [256, 1536]$).
+          </p>
+<p class="mb-4">
+            In this paradigm, retrieval is formally equivalent to finding the nearest neighbors to a query vector $q$:
+          </p>
+<div class="bg-surface-container-lowest p-3 my-4 rounded border border-outline-variant/30 text-center font-code-md text-code-md">
+            $\text{NN}(q, V) = \arg\min_{v \in V} \mathcal{D}(q, v)$
+          </div>
+<p>
+            Where $\mathcal{D}$ is typically cosine distance or Euclidean L2. When database collections scale to hundreds of millions of vectors, evaluating this formula across every item requires unsustainable latency and compute. The solution lies in algorithmic compromises that trade 1-2% recall accuracy for orders of magnitude higher throughput.
+          </p>
+</section>
+<section class="mb-10" id="section-hnsw">
+<h2 class="font-headline-md text-headline-md text-on-surface tracking-tight mb-4">
+            1. The Mechanics of HNSW Graphs
+          </h2>
+<p class="mb-4">
+            Hierarchical Navigable Small World (HNSW) graphs, introduced by Malkov and Yashunin in 2016, remain the undisputed gold standard for in-memory approximate nearest neighbor retrieval. The core insight borrows directly from Skip Lists: construct a multi-layered structure where the uppermost layer contains sparse, distant edges, and the bottom layer contains every single vector in dense, clustered neighborhoods.
+          </p>
+<div class="my-6 p-4 rounded bg-surface-container-low border border-outline-variant/40">
+<div class="w-full h-52 bg-surface-container-lowest border border-outline-variant/30 rounded flex items-center justify-center p-2">
+<svg class="w-full h-full text-on-surface" fill="none" viewbox="0 0 600 160" xmlns="http://www.w3.org/2000/svg">
+<rect fill="transparent" height="160" width="600"></rect>
+<g opacity="0.8">
+<text class="font-code-md text-[10px] fill-current opacity-60" x="20" y="30">Layer 2 · Long Range Skips</text>
+<circle cx="100" cy="40" fill="#944522" r="7"></circle>
+<circle cx="480" cy="40" fill="#944522" r="7"></circle>
+<path d="M107 40 L473 40" stroke="#944522" stroke-width="2"></path>
+<text class="font-code-md text-[10px] fill-current opacity-60" x="20" y="80">Layer 1 · Regional Clusters</text>
+<circle cx="100" cy="90" fill="#605e5c" r="5"></circle>
+<circle cx="260" cy="90" fill="#944522" r="6"></circle>
+<circle cx="480" cy="90" fill="#944522" r="6"></circle>
+<path d="M100 47 L260 85" stroke="#944522" stroke-dasharray="3 3"></path>
+<path d="M266 90 L474 90" stroke="#944522" stroke-width="1.5"></path>
+<text class="font-code-md text-[10px] fill-current opacity-60" x="20" y="130">Layer 0 · Full Topology (k=16)</text>
+<circle cx="100" cy="140" fill="#605e5c" r="4"></circle>
+<circle cx="180" cy="140" fill="#605e5c" r="4"></circle>
+<circle cx="260" cy="140" fill="#605e5c" r="4"></circle>
+<circle cx="380" cy="140" fill="#605e5c" r="4"></circle>
+<circle cx="480" cy="140" fill="#944522" r="6"></circle>
+<circle cx="530" cy="140" fill="#38654d" r="7"></circle>
+<path d="M480 96 L480 134" stroke="#944522" stroke-dasharray="3 3"></path>
+<path d="M486 140 L523 140" stroke="#38654d" stroke-width="2"></path>
+</g>
+</svg>
+</div>
+<figcaption class="font-body-sm text-body-sm text-secondary mt-2 text-center">
+              Figure 01: Layer-by-layer decay in graph hop radius. Layer 2 isolates search boundaries before dropping into dense subgraphs.
+            </figcaption>
+</div>
+<p class="mb-4">
+            During insertion, an element is assigned a maximum layer $l$ using an exponentially decaying probability distribution:
+          </p>
+<div class="bg-surface-container-lowest p-3 my-4 rounded border border-outline-variant/30 text-center font-code-md text-code-md">
+            $l = \lfloor -\ln(\text{uniform}(0, 1)) \cdot m_L \rfloor$
+          </div>
+<p>
+            Where $m_L$ governs the trade-off between search efficiency and redundant node duplication.
+          </p>
+</section>
+<section class="mb-10" id="section-quantization">
+<h2 class="font-headline-md text-headline-md text-on-surface tracking-tight mb-4">
+            2. Quantization and Memory Compression
+          </h2>
+<p class="mb-4">
+            The Achilles' heel of pure HNSW is RAM consumption. A 1,536-dimensional vector stored as 32-bit floating point numbers requires 6,144 bytes of storage. One billion vectors translates directly into <strong>6.14 Terabytes of raw vector data</strong>, not including the pointer overhead of the graph edges themselves ($16 \times 8 = 128$ bytes per vector).
+          </p>
+<p class="mb-4">
+            Production engines mitigate this through Product Quantization (PQ) and Scalar Quantization (SQ8):
+          </p>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+<div class="p-4 rounded bg-surface-container-lowest border border-outline-variant/40">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold">Scalar Quantization (SQ8)</span>
+<p class="font-body-sm text-body-sm text-on-surface mt-2">
+                Compresses each 32-bit float linearly into an 8-bit unsigned integer. Yields an immediate 75% memory drop with minimal degradation in recall (&gt;99% retained).
+              </p>
+</div>
+<div class="p-4 rounded bg-surface-container-lowest border border-outline-variant/40">
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold">Product Quantization (PQ)</span>
+<p class="font-body-sm text-body-sm text-on-surface mt-2">
+                Splits vectors into $M$ sub-vectors, assigns each to cluster centroids via k-means, and stores only centroid indices. Achieves up to 97% compression ratios.
+              </p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded border border-outline-variant/40 font-code-md text-code-md">
+<div class="flex items-center justify-between text-secondary mb-2 border-b border-outline-variant/20 pb-1">
+<span>quantize_fp32_to_sq8.py</span>
+<span>Python 3.11 / NumPy</span>
+</div>
+<pre class="text-on-surface overflow-x-auto text-[12px] leading-relaxed"><code><span class="text-primary">import</span> numpy <span class="text-primary">as</span> np
+
+<span class="text-primary">def</span> <span class="text-tertiary">scalar_quantize_8bit</span>(vectors: np.ndarray):
+    min_val = vectors.min(axis=0)
+    max_val = vectors.max(axis=0)
+    scale = (max_val - min_val) / 255.0
+    
+    <span class="text-secondary"># Map [-1.0, 1.0] continuous space to uint8 [0..255]</span>
+    quantized = np.clip((vectors - min_val) / scale, 0, 255).astype(np.uint8)
+    <span class="text-primary">return</span> quantized, min_val, scale</code></pre>
+</div>
+</section>
+<section class="mb-10" id="section-benchmarks">
+<h2 class="font-headline-md text-headline-md text-on-surface tracking-tight mb-4">
+            3. Production Benchmarks &amp; Sizing Matrix
+          </h2>
+<p class="mb-4">
+            When architects dimension vector infrastructure, the trade-off surface spans three orthogonal axes: Query Latency (p99), Memory Overhead (GB per 1M vectors), and Recall Accuracy.
+          </p>
+<div class="overflow-x-auto my-6 border border-outline-variant/40 rounded">
+<table class="w-full text-left font-body-sm text-body-sm">
+<thead class="bg-surface-container-low border-b border-outline-variant/30 font-label-sm text-label-sm text-secondary uppercase">
+<tr>
+<th class="p-3">Index Strategy</th>
+<th class="p-3">RAM per 1M Vectors</th>
+<th class="p-3">p99 Latency</th>
+<th class="p-3">Recall @ 10</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20 bg-surface-container-lowest">
+<tr>
+<td class="p-3 font-code-md text-code-md">Flat (Brute Force)</td>
+<td class="p-3">6.14 GB</td>
+<td class="p-3 text-error">420.0 ms</td>
+<td class="p-3 text-tertiary font-semibold">100.0%</td>
+</tr>
+<tr>
+<td class="p-3 font-code-md text-code-md">HNSW (M=16, ef=64)</td>
+<td class="p-3 text-secondary">7.20 GB</td>
+<td class="p-3 text-tertiary font-semibold">4.8 ms</td>
+<td class="p-3 text-tertiary font-semibold">98.4%</td>
+</tr>
+<tr>
+<td class="p-3 font-code-md text-code-md">HNSW + SQ8</td>
+<td class="p-3 text-tertiary font-semibold">1.95 GB</td>
+<td class="p-3 text-tertiary font-semibold">6.2 ms</td>
+<td class="p-3">97.1%</td>
+</tr>
+<tr>
+<td class="p-3 font-code-md text-code-md">IVF-PQ (M=64)</td>
+<td class="p-3 text-tertiary font-semibold">0.48 GB</td>
+<td class="p-3">12.4 ms</td>
+<td class="p-3 text-on-surface-variant">92.0%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section class="mb-12" id="section-conclusion">
+<h2 class="font-headline-md text-headline-md text-on-surface tracking-tight mb-4">
+            4. Architectural Takeaway
+          </h2>
+<p class="mb-4">
+            Vector indexing is never a binary choice between fast retrieval and high precision. For systems serving under 10 million vectors, standard HNSW with unquantized fp32 delivers unparalleled developer simplicity and deterministic results.
+          </p>
+<p>
+            Once collections push into the 100M+ regime, hybrid storage layouts—keeping the upper navigation layers of HNSW in memory while offloading quantized vector payloads to NVMe via memory-mapped files—represent the only financially viable operational model.
+          </p>
+</section>
+<footer class="pt-6 border-t border-outline-variant/30 flex items-center justify-between text-secondary font-label-sm text-label-sm">
+<span>BlogPilot Technical Publishing Format · RFC-009</span>
+<div class="flex items-center gap-3">
+<button class="hover:text-on-surface transition-colors flex items-center gap-1" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" type="button">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+<span>Back to Top</span>
+</button>
+</div>
+</footer>
+</main>
+<aside class="w-full lg:w-64 shrink-0 space-y-6">
+<div class="sticky top-28 space-y-6">
+<div class="bg-surface-container-lowest border border-outline-variant/40 rounded p-4">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-semibold block mb-3">Contents</span>
+<nav class="space-y-1.5 font-body-sm text-body-sm">
+<a class="block text-primary font-medium hover:underline" href="#section-intro">00 · Introduction</a>
+<a class="block text-on-surface-variant hover:text-on-surface transition-colors" href="#section-hnsw">01 · HNSW Graphs</a>
+<a class="block text-on-surface-variant hover:text-on-surface transition-colors" href="#section-quantization">02 · Quantization Trade-offs</a>
+<a class="block text-on-surface-variant hover:text-on-surface transition-colors" href="#section-benchmarks">03 · Production Benchmarks</a>
+<a class="block text-on-surface-variant hover:text-on-surface transition-colors" href="#section-conclusion">04 · Takeaway</a>
+</nav>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant/40 rounded p-4 space-y-3">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-semibold block">Article Telemetry</span>
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Validated Sources</span>
+<span class="font-code-md font-semibold text-tertiary">6 Papers</span>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Synthesized Figures</span>
+<span class="font-code-md font-semibold text-on-surface">1 Visual</span>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Code Artifacts</span>
+<span class="font-code-md font-semibold text-on-surface">2 Snippets</span>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Fact-Check Status</span>
+<span class="font-code-md font-semibold text-tertiary">Passed 100%</span>
+</div>
+</div>
+<button class="w-full py-2.5 px-3 rounded bg-surface-container-low hover:bg-surface-container border border-outline-variant/40 text-on-surface font-body-sm text-body-sm flex items-center justify-center gap-2 transition-colors" onclick="toggleResearchDrawer()" type="button">
+<span class="material-symbols-outlined text-[16px] text-primary">menu_book</span>
+<span>Inspect Research Trail</span>
+</button>
+</div>
+</aside>
+</div>
+</div>
+<div class="hidden w-full px-space-md sm:px-space-lg py-8 max-w-6xl mx-auto" id="view-runs">
+<div class="flex items-center justify-between mb-6 pb-4 border-b border-outline-variant/30">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Editorial Execution Runs</h2>
+<p class="font-body-sm text-body-sm text-secondary">Historical logs of autonomous research and technical synthesis jobs</p>
+</div>
+<button class="px-3 py-1.5 rounded bg-primary text-on-primary font-body-sm text-body-sm hover:bg-primary-container transition-colors" onclick="switchWorkspace('home')" type="button">
+        Trigger New Run
+      </button>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant/40 rounded-lg overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-sm text-body-sm">
+<thead class="bg-surface-container-low border-b border-outline-variant/30 font-label-sm text-label-sm text-secondary uppercase">
+<tr>
+<th class="p-3.5">Run Identifier &amp; Topic</th>
+<th class="p-3.5">Status</th>
+<th class="p-3.5">Sources</th>
+<th class="p-3.5">Word Count</th>
+<th class="p-3.5">Duration</th>
+<th class="p-3.5">Created</th>
+<th class="p-3.5 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20">
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="p-3.5">
+<div class="flex flex-col">
+<span class="font-code-md text-code-md text-primary font-medium">run_8921a_hnsw_retrieval</span>
+<span class="text-on-surface font-title-md">How vector databases actually retrieve information</span>
+</div>
+</td>
+<td class="p-3.5">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-tertiary-fixed/30 text-tertiary font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span>COMPLETED</span>
+</span>
+</td>
+<td class="p-3.5 font-code-md text-code-md">6 papers</td>
+<td class="p-3.5 font-code-md text-code-md">2,420 words</td>
+<td class="p-3.5 font-code-md text-code-md text-secondary">42s</td>
+<td class="p-3.5 text-secondary">Just now</td>
+<td class="p-3.5 text-right">
+<button class="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm transition-colors" onclick="switchWorkspace('reader')" type="button">
+                  Open Draft
+                </button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="p-3.5">
+<div class="flex flex-col">
+<span class="font-code-md text-code-md text-secondary">run_7742b_raft_consensus</span>
+<span class="text-on-surface font-title-md">Distributed consensus without Paxos: Raft vs Viewstamped</span>
+</div>
+</td>
+<td class="p-3.5">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-tertiary-fixed/30 text-tertiary font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span>COMPLETED</span>
+</span>
+</td>
+<td class="p-3.5 font-code-md text-code-md">9 papers</td>
+<td class="p-3.5 font-code-md text-code-md">3,150 words</td>
+<td class="p-3.5 font-code-md text-code-md text-secondary">58s</td>
+<td class="p-3.5 text-secondary">Yesterday</td>
+<td class="p-3.5 text-right">
+<button class="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm transition-colors" onclick="switchWorkspace('reader')" type="button">
+                  Open Draft
+                </button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="p-3.5">
+<div class="flex flex-col">
+<span class="font-code-md text-code-md text-secondary">run_6619c_lsm_trees_write</span>
+<span class="text-on-surface font-title-md">LSM-trees vs B-Trees under high write saturation</span>
+</div>
+</td>
+<td class="p-3.5">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-tertiary-fixed/30 text-tertiary font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span>COMPLETED</span>
+</span>
+</td>
+<td class="p-3.5 font-code-md text-code-md">4 papers</td>
+<td class="p-3.5 font-code-md text-code-md">1,890 words</td>
+<td class="p-3.5 font-code-md text-code-md text-secondary">31s</td>
+<td class="p-3.5 text-secondary">Sep 21</td>
+<td class="p-3.5 text-right">
+<button class="px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm transition-colors" onclick="switchWorkspace('reader')" type="button">
+                  Open Draft
+                </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-surface-container-lowest border-l border-outline-variant/40 shadow-xl transform translate-x-full transition-transform duration-200 ease-in-out flex flex-col" id="research-drawer">
+<div class="p-4 border-b border-outline-variant/30 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">source_notes</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Research Trail</h3>
+</div>
+<button class="p-1 rounded text-secondary hover:text-on-surface" onclick="toggleResearchDrawer()" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-4">
+<div class="p-3 rounded bg-surface-container-low border border-outline-variant/30 space-y-1">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-primary font-bold">SOURCE 01 · ARXIV</span>
+<span class="font-label-sm text-label-sm text-secondary">2016</span>
+</div>
+<h4 class="font-title-md text-title-md text-on-surface">Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs</h4>
+<p class="font-body-sm text-body-sm text-secondary">Yu. A. Malkov, D. A. Yashunin. Confirms skip list graph scaling and edge heuristics.</p>
+</div>
+<div class="p-3 rounded bg-surface-container-low border border-outline-variant/30 space-y-1">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-primary font-bold">SOURCE 02 · IEEE TPAMI</span>
+<span class="font-label-sm text-label-sm text-secondary">2011</span>
+</div>
+<h4 class="font-title-md text-title-md text-on-surface">Product Quantization for Nearest Neighbor Search</h4>
+<p class="font-body-sm text-body-sm text-secondary">Hervé Jégou, Matthijs Douze, Cordelia Schmid. Primary reference for sub-vector decomposition.</p>
+</div>
+<div class="p-3 rounded bg-surface-container-low border border-outline-variant/30 space-y-1">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-primary font-bold">SOURCE 03 · ENGINEERING DOC</span>
+<span class="font-label-sm text-label-sm text-secondary">2023</span>
+</div>
+<h4 class="font-title-md text-title-md text-on-surface">Pinecone Vector Storage &amp; Freshness Indexing</h4>
+<p class="font-body-sm text-body-sm text-secondary">Live indexing strategies with hybrid metadata filtering benchmarks.</p>
+</div>
+<div class="p-3 rounded bg-surface-container-low border border-outline-variant/30 space-y-1">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-primary font-bold">SOURCE 04 · META AI RESEARCH</span>
+<span class="font-label-sm text-label-sm text-secondary">2022</span>
+</div>
+<h4 class="font-title-md text-title-md text-on-surface">Faiss Library: Billion-scale similarity search</h4>
+<p class="font-body-sm text-body-sm text-secondary">GPU and AVX-512 SIMD vector quantization kernels.</p>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant/30 bg-surface-container-low">
+<div class="font-label-sm text-label-sm text-secondary">
+        All 6 documents parsed into local vector memory and cross-referenced before synthesis.
+      </div>
+</div>
+</div>
+<div class="fixed inset-0 z-50 bg-inverse-surface/40 backdrop-blur-xs hidden items-center justify-center p-4" id="telemetry-modal">
+<div class="w-full max-w-lg bg-surface-container-lowest rounded-lg border border-outline-variant/40 shadow-xl overflow-hidden">
+<div class="p-4 border-b border-outline-variant/30 flex items-center justify-between bg-surface-container-low">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Platform Telemetry Status</h3>
+</div>
+<button class="p-1 rounded text-secondary hover:text-on-surface" onclick="toggleTelemetryModal()" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="p-6 space-y-4">
+<div class="space-y-3 font-body-sm text-body-sm">
+<div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+<span class="font-medium text-on-surface">Reasoning Engine</span>
+<span class="font-code-md text-tertiary flex items-center gap-1.5 font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+              Operational (14ms)
+            </span>
+</div>
+<div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+<span class="font-medium text-on-surface">Research Retrieval Node</span>
+<span class="font-code-md text-tertiary flex items-center gap-1.5 font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+              Connected (ArXiv · IEEE)
+            </span>
+</div>
+<div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+<span class="font-medium text-on-surface">Vector Graph Index</span>
+<span class="font-code-md text-tertiary flex items-center gap-1.5 font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+              Warm (HNSW 16-ef)
+            </span>
+</div>
+<div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+<span class="font-medium text-on-surface">Code Execution Sandbox</span>
+<span class="font-code-md text-tertiary flex items-center gap-1.5 font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+              Isolated (gVisor)
+            </span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-medium text-on-surface">Active Run Memory</span>
+<span class="font-code-md text-secondary">312 MB / 2.0 GB</span>
+</div>
+</div>
+<div class="p-3 bg-surface-container-low rounded border border-outline-variant/30 text-secondary font-label-sm text-label-sm">
+          BlogPilot runs on localized deterministic agents with fact check pipelines enabled on every markdown generation pass.
+        </div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  function switchWorkspace(mode) {
+    const views = ['home', 'pipeline', 'reader', 'runs'];
+    views.forEach(v => {
+      const el = document.getElementById('view-' + v);
+      const tab = document.getElementById('tab-' + v);
+      if (v === mode) {
+        el.classList.remove('hidden');
+        if (tab) {
+          tab.classList.add('bg-surface-container-high', 'text-on-surface', 'font-semibold', 'shadow-sm');
+          tab.classList.remove('text-on-surface-variant');
+        }
+      } else {
+        el.classList.add('hidden');
+        if (tab) {
+          tab.classList.remove('bg-surface-container-high', 'text-on-surface', 'font-semibold', 'shadow-sm');
+          tab.classList.add('text-on-surface-variant');
+        }
+      }
+    });
+
+    const researchTrigger = document.getElementById('btn-research-trigger');
+    if (researchTrigger) {
+      if (mode === 'reader' || mode === 'pipeline') {
+        researchTrigger.classList.remove('hidden');
+      } else {
+        researchTrigger.classList.add('hidden');
+      }
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function setTopic(text) {
+    const textarea = document.getElementById('article-prompt');
+    if (textarea) {
+      textarea.value = text.trim();
+      textarea.focus();
+    }
+  }
+
+  function startGenerationFlow() {
+    switchWorkspace('pipeline');
+    
+    const ticker = document.getElementById('pipeline-ticker');
+    const tickerMessages = [
+      "Analyzing vector clustering algorithms and index topologies...",
+      "Synthesizing Malkov skip-search comparative benchmarks...",
+      "Generating Figure 01: Layer skip graph traversal vector...",
+      "Drafting mathematical precision callouts for quantization..."
+    ];
+    
+    let step = 0;
+    const interval = setInterval(() => {
+      step++;
+      if (step < tickerMessages.length && ticker) {
+        ticker.innerText = tickerMessages[step];
+      } else {
+        clearInterval(interval);
+      }
+    }, 1800);
+  }
+
+  function toggleResearchDrawer() {
+    const drawer = document.getElementById('research-drawer');
+    if (drawer) {
+      drawer.classList.toggle('translate-x-full');
+    }
+  }
+
+  function toggleTelemetryModal() {
+    const modal = document.getElementById('telemetry-modal');
+    if (modal) {
+      modal.classList.toggle('hidden');
+      modal.classList.toggle('flex');
+    }
+  }
+
+  function downloadMarkdown() {
+    const text = `# How Vector Databases Actually Retrieve Information\n\nGenerated by BlogPilot Autonomous Technical Publishing\n\nWhen a modern engineering team replaces keyword inversion indices (BM25) with vector similarity search, they often treat the index as a magical black box that translates floating-point arrays into semantic matches...\n\n(Complete 2,420-word draft downloaded)`;
+    const blob = new Blob([text], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'vector-databases-retrieval.md';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+</script></main><footer class="w-full bg-surface border-t border-outline-variant/30 py-space-md"><div class="w-full px-space-lg flex flex-col sm:flex-row items-center justify-between gap-space-sm font-label-sm text-label-sm text-on-surface-variant"><div>BlogPilot Autonomous Publishing Engine · JetBrains Mono &amp; Playfair Editorial</div><div class="flex items-center gap-space-md"><a class="hover:text-on-surface transition-colors uppercase tracking-wider" data-path="telemetry-status" href="#">Diagnostics</a><span class="text-outline-variant">•</span><a class="hover:text-on-surface transition-colors uppercase tracking-wider" data-path="system-settings" href="#">Config</a></div></div></footer></body></html>

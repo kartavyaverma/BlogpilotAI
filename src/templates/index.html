@@ -27,13 +27,13 @@
     >
 
     <link
-        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap"
         rel="stylesheet"
     >
 
     <link
         rel="stylesheet"
-        href="{{ url_for('static', path='css/style.css') }}?v=purple2"
+        href="{{ url_for('static', path='css/style.css') }}?v=editorial1"
     >
 </head>
 
@@ -44,11 +44,11 @@
     <div class="app-layout">
         <aside class="sidebar">
             <a href="/" class="brand">
-                <div class="brand-logo">✦</div>
+                <div class="brand-logo">v1.4</div>
 
                 <div>
-                    <strong>BlogPilot AI</strong>
-                    <small>LangGraph workspace</small>
+                    <strong>BlogPilot</strong>
+                    <small>Editorial workbench</small>
                 </div>
             </a>
 
@@ -58,11 +58,11 @@
                 type="button"
             >
                 <span>＋</span>
-                New article
+                New Article
             </button>
 
             <div class="workflow-menu">
-                <p>Workflow</p>
+                <p>Editorial Pipeline</p>
 
                 <div class="workflow-item">
                     <span>01</span>
@@ -95,25 +95,43 @@
             <header class="topbar">
                 <div>
                     <span class="eyebrow">
-                        AI content workspace
+                        Autonomous Technical Publishing
                     </span>
 
                     <h1>
-                        Build technical articles
+                        Turn an idea into a technical story.
                     </h1>
+
+                    <p class="topbar-lede">
+                        Research, structure, write, and illustrate
+                        in one disciplined editorial pipeline.
+                    </p>
                 </div>
 
-                <div
-                    id="runBadge"
-                    class="run-badge"
-                >
-                    Ready
+                <div class="topbar-meta">
+                    <div class="health-chip">
+                        <span
+                            id="healthDot"
+                            class="health-dot"
+                        ></span>
+
+                        <span id="healthText">
+                            Checking server
+                        </span>
+                    </div>
+
+                    <div
+                        id="runBadge"
+                        class="run-badge"
+                    >
+                        Ready
+                    </div>
                 </div>
             </header>
 
             <section class="composer-card">
                 <div class="composer-heading">
-                    <div class="composer-icon">✦</div>
+                    <div class="composer-icon">›_</div>
 
                     <div>
                         <h2>
@@ -176,8 +194,8 @@
                                 class="run-button"
                                 type="submit"
                             >
-                                <span>Run agent</span>
-                                <span>➜</span>
+                                <span>Start writing</span>
+                                <span>→</span>
                             </button>
                         </div>
                     </div>

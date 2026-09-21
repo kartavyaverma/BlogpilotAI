@@ -49,3 +49,7 @@ desktop.ini
 *.swp
 *.swo
 *~
+
+# AI tool files
+.prompt
+.claude
