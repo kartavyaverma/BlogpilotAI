@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -8,6 +9,13 @@ from langgraph.graph import END, START, StateGraph
 from core.config import settings
 from core.llm import get_llm
 from schemas.models import GlobalImagePlan, State
+
+
+def _sanitize_filename(title: str) -> str:
+    """Strip filesystem-unsafe characters from blog_title for use as a filename."""
+    sanitized = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "-", title)
+    sanitized = sanitized.strip(". ")
+    return sanitized[:200] or "blog"
 
 
 def merge_content(state: State) -> dict:
@@ -109,8 +117,6 @@ def generate_and_place_images(state: State) -> dict:
     settings.ensure_directories()
 
     if not image_specs:
-        output_file = settings.base_dir / f"{plan.blog_title}.md"
-        output_file.write_text(md, encoding="utf-8")
         return {"final": md}
 
     images_dir = settings.images_dir
@@ -145,8 +151,6 @@ def generate_and_place_images(state: State) -> dict:
         image_md = f"\n\n![{alt_text}](/images/{filename}){caption_md}\n"
         md = md.replace(placeholder, image_md)
 
-    output_file = settings.base_dir / f"{plan.blog_title}.md"
-    output_file.write_text(md, encoding="utf-8")
     return {"final": md}
 
 
