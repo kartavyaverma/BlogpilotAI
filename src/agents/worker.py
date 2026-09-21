@@ -53,7 +53,7 @@ def worker_node(payload: dict) -> dict:
             for e in evidence[:20]
         )
 
-    section_md = get_llm().invoke(
+    response = get_llm().invoke(
         [
             SystemMessage(content=WORKER_SYSTEM),
             HumanMessage(
@@ -77,6 +77,11 @@ def worker_node(payload: dict) -> dict:
                 )
             ),
         ]
-    ).content.strip()
+    )
+    raw_content = response.content
+    if isinstance(raw_content, list):
+        section_md = "".join(str(part) for part in raw_content).strip()
+    else:
+        section_md = str(raw_content).strip()
 
     return {"sections": [(task.id, section_md)]}

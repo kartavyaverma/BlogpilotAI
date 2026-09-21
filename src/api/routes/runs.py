@@ -16,7 +16,7 @@ class AgentRunRequest(BaseModel):
     topic: str = Field(
         ...,
         min_length=3,
-        max_length=1000,
+        max_length=5000,
         description="The technical blog topic.",
     )
 

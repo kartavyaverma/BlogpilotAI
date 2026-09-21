@@ -114,10 +114,15 @@ def generate_and_place_images(state: State) -> dict:
         return {"final": md}
 
     images_dir = settings.images_dir
+    images_dir.mkdir(parents=True, exist_ok=True)
 
     for spec in image_specs:
         placeholder = spec["placeholder"]
-        filename = spec["filename"]
+        raw_filename = spec.get("filename", "")
+        filename = Path(raw_filename).name or f"image_{placeholder}.png"
+        if not filename.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+            filename = f"{filename}.png"
+
         out_path = images_dir / filename
 
         if not out_path.exists():
@@ -126,13 +131,19 @@ def generate_and_place_images(state: State) -> dict:
                 out_path.write_bytes(img_bytes)
             except Exception as e:
                 prompt_block = (
-                    f"> **[IMAGE GENERATION FAILED]** {spec.get('caption','')}\n>\n"
+                    f"\n\n> **[IMAGE GENERATION FAILED]** {spec.get('caption','')}\n>\n"
                     f"> **Alt:** {spec.get('alt','')}\n>\n"
                     f"> **Prompt:** {spec.get('prompt','')}\n>\n"
-                    f"> **Error:** {e}\n"
+                    f"> **Error:** {e}\n\n"
                 )
                 md = md.replace(placeholder, prompt_block)
                 continue
+
+        alt_text = spec.get("alt", "").strip() or spec.get("caption", "").strip() or "Technical Diagram"
+        caption_text = spec.get("caption", "").strip()
+        caption_md = f"\n*{caption_text}*\n" if caption_text else ""
+        image_md = f"\n\n![{alt_text}](/images/{filename}){caption_md}\n"
+        md = md.replace(placeholder, image_md)
 
     output_file = settings.base_dir / f"{plan.blog_title}.md"
     output_file.write_text(md, encoding="utf-8")

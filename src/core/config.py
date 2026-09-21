@@ -26,7 +26,13 @@ def _optional(name: str, default: str = "") -> str:
 
 @dataclass(frozen=True)
 class Settings:
-    openai_api_key: str = field(default_factory=lambda: _require("OPENAI_API_KEY"))
+    llm_provider: str = field(
+        default_factory=lambda: _optional(
+            "LLM_PROVIDER",
+            "gemini" if os.getenv("GOOGLE_API_KEY") and not os.getenv("OPENAI_API_KEY") else "openai",
+        ).lower()
+    )
+    openai_api_key: str = field(default_factory=lambda: _optional("OPENAI_API_KEY"))
     openai_model: str = field(
         default_factory=lambda: _optional("OPENAI_MODEL", "gpt-4o-mini")
     )
@@ -34,14 +40,17 @@ class Settings:
         default_factory=lambda: float(_optional("LLM_TEMPERATURE", "0"))
     )
 
-    tavily_api_key: str = field(default_factory=lambda: _optional("TAVILY_API_KEY"))
-    tavily_max_results: int = field(
-        default_factory=lambda: int(_optional("TAVILY_MAX_RESULTS", "6"))
+    gemini_model: str = field(
+        default_factory=lambda: _optional("GEMINI_MODEL", "gemini-2.5-flash")
     )
-
     google_api_key: str = field(default_factory=lambda: _optional("GOOGLE_API_KEY"))
     gemini_image_model: str = field(
         default_factory=lambda: _optional("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
+    )
+
+    tavily_api_key: str = field(default_factory=lambda: _optional("TAVILY_API_KEY"))
+    tavily_max_results: int = field(
+        default_factory=lambda: int(_optional("TAVILY_MAX_RESULTS", "6"))
     )
 
     database_url_raw: str = field(default_factory=lambda: _require("DATABASE_URL"))
@@ -57,6 +66,24 @@ class Settings:
     static_dir: Path = field(default_factory=lambda: BASE_DIR / "src" / "static")
     images_dir: Path = field(default_factory=lambda: BASE_DIR / "images")
     outputs_dir: Path = field(default_factory=lambda: BASE_DIR / "outputs")
+
+    def __post_init__(self) -> None:
+        if self.llm_provider == "gemini":
+            if not self.google_api_key:
+                raise ValueError(
+                    "GOOGLE_API_KEY is missing. Please add GOOGLE_API_KEY=... to your .env file "
+                    "(see .env.example) when using LLM_PROVIDER=gemini."
+                )
+        elif self.llm_provider == "openai":
+            if not self.openai_api_key:
+                raise ValueError(
+                    "OPENAI_API_KEY is missing. Please add OPENAI_API_KEY=... to your .env file "
+                    "(see .env.example) when using LLM_PROVIDER=openai."
+                )
+        else:
+            raise ValueError(
+                f"Unsupported LLM_PROVIDER '{self.llm_provider}'. Supported values are 'gemini' or 'openai'."
+            )
 
     @property
     def database_url(self) -> str:

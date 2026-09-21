@@ -128,9 +128,9 @@ BlogPilot-AI/
 - **Python**: 3.11 or higher
 - **PostgreSQL**: Required for state checkpointing (use a local instance, Docker, or managed service such as Supabase / Neon / Render Postgres)
 - **API Keys**:
-  - `OPENAI_API_KEY`: Required for LLM reasoning and writing
-  - `TAVILY_API_KEY`: Required for online research and fact-finding
-  - `GOOGLE_API_KEY`: Optional, used by Gemini for automated technical diagrams/illustrations
+  - `GOOGLE_API_KEY`: Required if using Gemini (`LLM_PROVIDER=gemini`) and for Gemini visual diagram generation
+  - `OPENAI_API_KEY`: Required if using OpenAI (`LLM_PROVIDER=openai`)
+  - `TAVILY_API_KEY`: Required for online research and fact-finding (open/hybrid mode)
 
 ---
 
@@ -146,14 +146,16 @@ Configure the following variables in `.env`:
 
 | Variable | Description | Required | Default |
 |---|---|:---:|---|
-| `OPENAI_API_KEY` | OpenAI API access key | **Yes** | — |
-| `OPENAI_MODEL` | Primary LLM model for agents | No | `gpt-4o-mini` |
+| `LLM_PROVIDER` | LLM backend (`gemini` or `openai`) | No | `gemini` |
+| `GOOGLE_API_KEY` | Google AI key for Gemini reasoning & visuals | Yes (if Gemini) | — |
+| `GEMINI_MODEL` | Gemini model for blog agents | No | `gemini-2.5-flash` |
+| `GEMINI_IMAGE_MODEL` | Gemini model for technical illustrations | No | `gemini-2.5-flash-image` |
+| `OPENAI_API_KEY` | OpenAI API access key | Yes (if OpenAI) | — |
+| `OPENAI_MODEL` | Primary LLM model if using OpenAI | No | `gpt-4o-mini` |
 | `LLM_TEMPERATURE` | Generation temperature for agents | No | `0` |
 | `DATABASE_URL` | PostgreSQL connection URI for state checkpointing | **Yes** | `postgresql://user:pass@localhost:5432/blogpilot` |
 | `TAVILY_API_KEY` | Tavily Search API key for research agent | No* | — (*Required for hybrid/open search) |
 | `TAVILY_MAX_RESULTS` | Number of web search results per query | No | `6` |
-| `GOOGLE_API_KEY` | Google AI key for Gemini image generation | No | — |
-| `GEMINI_IMAGE_MODEL` | Model used for technical illustrations | No | `gemini-2.5-flash-image` |
 | `APP_HOST` | FastAPI server bind host | No | `127.0.0.1` |
 | `APP_PORT` | FastAPI server bind port | No | `8000` |
 | `APP_RELOAD` | Enable hot reloading in development | No | `true` |
@@ -218,7 +220,7 @@ This repository includes a native [`render.yaml`](render.yaml) blueprint:
 1. Push your repository to GitHub.
 2. Link your repository in the [Render Dashboard](https://dashboard.render.com).
 3. Create a **New Blueprint Instance**.
-4. Configure your secret environment variables (`OPENAI_API_KEY`, `TAVILY_API_KEY`, `DATABASE_URL`, and optionally `GOOGLE_API_KEY`) under the service settings.
+4. Configure your secret environment variables (`GOOGLE_API_KEY`, `DATABASE_URL`, and optionally `TAVILY_API_KEY` or `OPENAI_API_KEY`) under the service settings.
 
 ---
 

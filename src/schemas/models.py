@@ -57,7 +57,7 @@ class EvidencePack(BaseModel):
 
 class ImageSpec(BaseModel):
     placeholder: str = Field(..., description="e.g. [[IMAGE_1]]")
-    filename: str = Field(..., description="Save under images/, e.g. qkv_flow.png")
+    filename: str = Field(..., description="Image filename only (without directory), e.g. qkv_flow.png")
     alt: str
     caption: str
     prompt: str = Field(..., description="Prompt to send to the image model.")
