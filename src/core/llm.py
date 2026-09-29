@@ -15,6 +15,7 @@ def get_llm() -> BaseChatModel:
         return ChatGroq(
             model=settings.groq_model,
             temperature=settings.llm_temperature,
+            max_tokens=settings.llm_max_tokens,
             api_key=settings.groq_api_key,
         )
 
@@ -24,6 +25,7 @@ def get_llm() -> BaseChatModel:
         return ChatOpenAI(
             model=settings.openrouter_model,
             temperature=settings.llm_temperature,
+            max_tokens=settings.llm_max_tokens,
             api_key=settings.openrouter_api_key,
             base_url=settings.openrouter_base_url,
         )
@@ -34,6 +36,7 @@ def get_llm() -> BaseChatModel:
         return ChatOpenAI(
             model=settings.moonshot_model,
             temperature=settings.llm_temperature,
+            max_tokens=settings.llm_max_tokens,
             api_key=settings.moonshot_api_key,
             base_url=settings.moonshot_base_url,
         )

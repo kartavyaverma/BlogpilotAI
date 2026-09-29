@@ -27,13 +27,14 @@ def _optional(name: str, default: str = "") -> str:
 def _default_provider() -> str:
     """Pick a provider from whichever key is actually present.
 
-    Kimi K2 on Groq wins when its key is set: it is free, fast and the best
-    tool caller of the bunch, which is what the agent graph leans on.
+    OpenRouter wins when its key is set: it is the route that still serves
+    Kimi K2, which is the model this pipeline is tuned for. Groq is next -
+    it no longer lists any Kimi model, but it is free and fast.
     """
-    if os.getenv("GROQ_API_KEY"):
-        return "groq"
     if os.getenv("OPENROUTER_API_KEY"):
         return "openrouter"
+    if os.getenv("GROQ_API_KEY"):
+        return "groq"
     if os.getenv("MOONSHOT_API_KEY"):
         return "moonshot"
     if os.getenv("GOOGLE_API_KEY") and not os.getenv("OPENAI_API_KEY"):
@@ -50,20 +51,20 @@ class Settings:
         ).lower()
     )
 
-    # Kimi K2 (Moonshot) served by Groq - 256K context, strong tool use.
+    # Groq: free and very fast, but it no longer serves any Kimi model.
+    # Check the current catalogue at https://console.groq.com/docs/models
     groq_api_key: str = field(default_factory=lambda: _optional("GROQ_API_KEY"))
     groq_model: str = field(
-        default_factory=lambda: _optional(
-            "GROQ_MODEL", "moonshotai/kimi-k2-instruct-0905"
-        )
+        default_factory=lambda: _optional("GROQ_MODEL", "openai/gpt-oss-120b")
     )
 
-    # Kimi K2 through OpenRouter (free variant) - OpenAI-compatible.
+    # Kimi K2 (Moonshot) through OpenRouter - 256K context, strong tool use.
+    # The ":free" variant was retired; the paid slug below is inexpensive.
     openrouter_api_key: str = field(
         default_factory=lambda: _optional("OPENROUTER_API_KEY")
     )
     openrouter_model: str = field(
-        default_factory=lambda: _optional("OPENROUTER_MODEL", "moonshotai/kimi-k2:free")
+        default_factory=lambda: _optional("OPENROUTER_MODEL", "moonshotai/kimi-k2-0905")
     )
     openrouter_base_url: str = field(
         default_factory=lambda: _optional(
@@ -88,6 +89,12 @@ class Settings:
     )
     llm_temperature: float = field(
         default_factory=lambda: float(_optional("LLM_TEMPERATURE", "0"))
+    )
+    # Caps the response length per agent call. Without a cap, OpenAI-compatible
+    # gateways reserve the model's full output window up front, which credit
+    # limited accounts reject with "requires more credits, or fewer max_tokens".
+    llm_max_tokens: int = field(
+        default_factory=lambda: int(_optional("LLM_MAX_TOKENS", "8000"))
     )
 
     gemini_model: str = field(

@@ -8,10 +8,14 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.10
       - key: LLM_PROVIDER
-        value: groq
-      - key: GROQ_MODEL
-        value: moonshotai/kimi-k2-instruct-0905
+        value: openrouter
+      - key: OPENROUTER_MODEL
+        value: moonshotai/kimi-k2-0905
+      - key: LLM_MAX_TOKENS
+        value: 8000
       # Set this one in the Render dashboard: Environment -> Add Environment Variable
+      - key: OPENROUTER_API_KEY
+        sync: false
       - key: GROQ_API_KEY
         sync: false
       - key: GEMINI_MODEL

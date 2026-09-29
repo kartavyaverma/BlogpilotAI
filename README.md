@@ -129,8 +129,8 @@ BlogPilot-AI/
 - **Python**: 3.11 or higher
 - **PostgreSQL**: Required for state checkpointing (use a local instance, Docker, or managed service such as Supabase / Neon / Render Postgres)
 - **API Keys**:
-  - `GROQ_API_KEY`: **Recommended.** Runs **Kimi K2 (Moonshot)** on Groq - free tier, very fast, and strong at agent/tool use, which is what this graph relies on. Get one at [console.groq.com](https://console.groq.com) -> *API Keys* -> *Create API Key*
-  - `OPENROUTER_API_KEY`: Optional fallback for the same model (`moonshotai/kimi-k2:free`) when Groq's free rate limits are hit - [openrouter.ai](https://openrouter.ai) -> *Keys*
+  - `OPENROUTER_API_KEY`: **Recommended.** The route that still serves **Kimi K2 (Moonshot)** - 256K context and excellent agent/tool use, which is what this graph relies on. Get one at [openrouter.ai](https://openrouter.ai) -> *Keys*. Requires a small credit balance
+  - `GROQ_API_KEY`: Free and the fastest option, but **Groq no longer serves any Kimi model** - it runs `openai/gpt-oss-120b` here instead. [console.groq.com](https://console.groq.com) -> *API Keys*
   - `MOONSHOT_API_KEY`: Optional, for Kimi K2 straight from Moonshot (pay-as-you-go) - [platform.moonshot.ai](https://platform.moonshot.ai) -> *API Keys*
   - `GOOGLE_API_KEY`: Required if using Gemini (`LLM_PROVIDER=gemini`), **and for visual diagram generation with any provider**. Without it, articles are still generated and diagrams are skipped
   - `OPENAI_API_KEY`: Required if using OpenAI (`LLM_PROVIDER=openai`)
@@ -138,15 +138,19 @@ BlogPilot-AI/
 
 ### Choosing a model provider
 
-| Provider | `LLM_PROVIDER` | Model | Context | Cost |
+| Provider | `LLM_PROVIDER` | Default model | Context | Cost |
 |---|---|---|---|---|
-| **Groq** (recommended) | `groq` | `moonshotai/kimi-k2-instruct-0905` | 256K | Free tier (per-minute / per-day limits) |
-| OpenRouter | `openrouter` | `moonshotai/kimi-k2:free` | 128K+ | Free variant |
+| **OpenRouter** (recommended, Kimi K2) | `openrouter` | `moonshotai/kimi-k2-0905` | 256K | ~$0.60 / M input, ~$2.50 / M output |
+| Groq (fastest, free - no Kimi) | `groq` | `openai/gpt-oss-120b` | 128K | Free tier (per-minute / per-day limits) |
 | Moonshot direct | `moonshot` | `kimi-k2-0905-preview` | 256K | Pay-as-you-go |
 | Google Gemini | `gemini` | `gemini-2.5-flash` | 1M | Free tier / paid |
 | OpenAI | `openai` | `gpt-4o-mini` | 128K | Paid |
 
-If `LLM_PROVIDER` is not set, the provider is picked from whichever key is present, preferring `GROQ_API_KEY`.
+If `LLM_PROVIDER` is not set, the provider is picked from whichever key is present, preferring `OPENROUTER_API_KEY`, then `GROQ_API_KEY`.
+
+> **Model IDs move.** Groq dropped every Kimi model from its catalogue and OpenRouter retired the free `moonshotai/kimi-k2:free` slug. If a run fails with a 404, check the provider's current model list and update `GROQ_MODEL` / `OPENROUTER_MODEL`.
+
+> **Keep `LLM_MAX_TOKENS` set.** OpenAI-compatible gateways reserve the model's entire output window up front unless a cap is given, which credit-limited accounts reject with `402 ... requires more credits, or fewer max_tokens`.
 
 ---
 
@@ -163,10 +167,11 @@ Configure the following variables in `.env`:
 | Variable | Description | Required | Default |
 |---|---|:---:|---|
 | `LLM_PROVIDER` | LLM backend (`groq`, `openrouter`, `moonshot`, `gemini` or `openai`) | No | `groq` if `GROQ_API_KEY` is set |
-| `GROQ_API_KEY` | Groq key serving Kimi K2 | Yes (if Groq) | — |
-| `GROQ_MODEL` | Kimi K2 model ID on Groq | No | `moonshotai/kimi-k2-instruct-0905` |
-| `OPENROUTER_API_KEY` | OpenRouter key (Kimi K2 free variant) | Yes (if OpenRouter) | — |
-| `OPENROUTER_MODEL` | Kimi K2 model ID on OpenRouter | No | `moonshotai/kimi-k2:free` |
+| `LLM_MAX_TOKENS` | Max output tokens per agent call | No | `8000` |
+| `OPENROUTER_API_KEY` | OpenRouter key (serves Kimi K2) | Yes (if OpenRouter) | — |
+| `OPENROUTER_MODEL` | Kimi K2 model ID on OpenRouter | No | `moonshotai/kimi-k2-0905` |
+| `GROQ_API_KEY` | Groq key (no Kimi model available) | Yes (if Groq) | — |
+| `GROQ_MODEL` | Model ID on Groq | No | `openai/gpt-oss-120b` |
 | `OPENROUTER_BASE_URL` | OpenAI-compatible endpoint for OpenRouter | No | `https://openrouter.ai/api/v1` |
 | `MOONSHOT_API_KEY` | Moonshot platform key (paid, direct) | Yes (if Moonshot) | — |
 | `MOONSHOT_MODEL` | Kimi K2 model ID on Moonshot | No | `kimi-k2-0905-preview` |
@@ -245,12 +250,12 @@ This repository includes a native [`render.yaml`](render.yaml) blueprint:
 2. Link your repository in the [Render Dashboard](https://dashboard.render.com).
 3. Create a **New Blueprint Instance**.
 4. Configure your secret environment variables under **Service settings -> Environment -> Add Environment Variable**:
-   - `GROQ_API_KEY` - your Kimi K2 key from [console.groq.com](https://console.groq.com) (never commit it to the repo)
+   - `OPENROUTER_API_KEY` - your Kimi K2 key from [openrouter.ai](https://openrouter.ai) (never commit it to the repo)
    - `DATABASE_URL` - PostgreSQL connection URI
    - `GOOGLE_API_KEY` - optional, enables generated diagrams
    - `TAVILY_API_KEY` - optional, enables web research
 
-   `LLM_PROVIDER=groq` and `GROQ_MODEL` are already set for you in [`render.yaml`](render.yaml).
+   `LLM_PROVIDER=openrouter`, `OPENROUTER_MODEL` and `LLM_MAX_TOKENS` are already set for you in [`render.yaml`](render.yaml).
 
 ---
 
