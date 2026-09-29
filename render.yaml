@@ -8,9 +8,15 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.10
       - key: LLM_PROVIDER
-        value: gemini
+        value: groq
+      - key: GROQ_MODEL
+        value: moonshotai/kimi-k2-instruct-0905
+      # Set this one in the Render dashboard: Environment -> Add Environment Variable
+      - key: GROQ_API_KEY
+        sync: false
       - key: GEMINI_MODEL
         value: gemini-2.5-flash
+      # Still used for generating diagrams, even when Kimi K2 writes the article.
       - key: GOOGLE_API_KEY
         sync: false
       - key: DATABASE_URL
