@@ -19,17 +19,6 @@ def get_llm() -> BaseChatModel:
             api_key=settings.groq_api_key,
         )
 
-    if settings.llm_provider == "openrouter":
-        from langchain_openai import ChatOpenAI
-
-        return ChatOpenAI(
-            model=settings.openrouter_model,
-            temperature=settings.llm_temperature,
-            max_tokens=settings.llm_max_tokens,
-            api_key=settings.openrouter_api_key,
-            base_url=settings.openrouter_base_url,
-        )
-
     if settings.llm_provider == "moonshot":
         from langchain_openai import ChatOpenAI
 

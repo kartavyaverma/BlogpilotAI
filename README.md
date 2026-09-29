@@ -17,7 +17,7 @@
 - **Autonomous Deep Research**: Leverages **Tavily Search API** to fetch up-to-date facts, documentation, and industry benchmarks before drafting.
 - **Parallel Section Fan-Out**: The Orchestrator agent crafts a comprehensive blog outline and fans out section generation to parallel worker agents simultaneously.
 - **Reducer Subgraph & Visuals**: An editorial reducer agent stitches content seamlessly, audits the post for visual diagram opportunities, and generates technical visuals using **Google Gemini**.
-- **Kimi K2 by Default**: Reasoning, planning and writing run on **Kimi K2 (Moonshot)** with a 128K-256K context window and excellent tool-use behaviour; Gemini, OpenAI and OpenRouter remain drop-in alternatives.
+- **Kimi by Default**: Reasoning, planning and writing run on **Kimi (Moonshot)** with a 262K context window and excellent tool-use behaviour; Groq, Gemini and OpenAI remain drop-in alternatives.
 - **Real-Time SSE Streaming**: Live progress events, agent status updates, and tokens stream directly to the browser interface.
 - **Durable State Checkpointing**: Integrated PostgreSQL checkpointer preserves agent graph state across interrupts and execution steps.
 - **Clean Architecture**: Strictly separated concerns (Core, Schemas, Agents, Graph Topology, API Routes, and UI Assets).
@@ -129,9 +129,8 @@ BlogPilot-AI/
 - **Python**: 3.11 or higher
 - **PostgreSQL**: Required for state checkpointing (use a local instance, Docker, or managed service such as Supabase / Neon / Render Postgres)
 - **API Keys**:
-  - `OPENROUTER_API_KEY`: **Recommended.** The route that still serves **Kimi K2 (Moonshot)** - 256K context and excellent agent/tool use, which is what this graph relies on. Get one at [openrouter.ai](https://openrouter.ai) -> *Keys*. Requires a small credit balance
-  - `GROQ_API_KEY`: Free and the fastest option, but **Groq no longer serves any Kimi model** - it runs `openai/gpt-oss-120b` here instead. [console.groq.com](https://console.groq.com) -> *API Keys*
-  - `MOONSHOT_API_KEY`: Optional, for Kimi K2 straight from Moonshot (pay-as-you-go) - [platform.moonshot.ai](https://platform.moonshot.ai) -> *API Keys*
+  - `MOONSHOT_API_KEY`: **Recommended.** Runs **Kimi** straight from Moonshot - 262K context and excellent agent/tool use, which is what this graph relies on. Get one at [platform.moonshot.ai](https://platform.moonshot.ai) -> *API Keys*. **Paid: there is no free tier, the account needs a balance**
+  - `GROQ_API_KEY`: Free fallback and the fastest option, but **Groq serves no Kimi model** - it runs `openai/gpt-oss-120b` here instead. [console.groq.com](https://console.groq.com) -> *API Keys*
   - `GOOGLE_API_KEY`: Required if using Gemini (`LLM_PROVIDER=gemini`), **and for visual diagram generation with any provider**. Without it, articles are still generated and diagrams are skipped
   - `OPENAI_API_KEY`: Required if using OpenAI (`LLM_PROVIDER=openai`)
   - `TAVILY_API_KEY`: Required for online research and fact-finding (open/hybrid mode)
@@ -140,17 +139,32 @@ BlogPilot-AI/
 
 | Provider | `LLM_PROVIDER` | Default model | Context | Cost |
 |---|---|---|---|---|
-| **OpenRouter** (recommended, Kimi K2) | `openrouter` | `moonshotai/kimi-k2-0905` | 256K | ~$0.60 / M input, ~$2.50 / M output |
+| **Moonshot** (recommended, Kimi) | `moonshot` | `kimi-k2.6` | 262K | Paid only - $0.95 / M input, $4.00 / M output |
 | Groq (fastest, free - no Kimi) | `groq` | `openai/gpt-oss-120b` | 128K | Free tier (per-minute / per-day limits) |
-| Moonshot direct | `moonshot` | `kimi-k2-0905-preview` | 256K | Pay-as-you-go |
 | Google Gemini | `gemini` | `gemini-2.5-flash` | 1M | Free tier / paid |
 | OpenAI | `openai` | `gpt-4o-mini` | 128K | Paid |
 
-If `LLM_PROVIDER` is not set, the provider is picked from whichever key is present, preferring `OPENROUTER_API_KEY`, then `GROQ_API_KEY`.
+If `LLM_PROVIDER` is not set, the provider is picked from whichever key is present, preferring `MOONSHOT_API_KEY`, then `GROQ_API_KEY`.
 
-> **Model IDs move.** Groq dropped every Kimi model from its catalogue and OpenRouter retired the free `moonshotai/kimi-k2:free` slug. If a run fails with a 404, check the provider's current model list and update `GROQ_MODEL` / `OPENROUTER_MODEL`.
+### What each run costs
 
-> **Keep `LLM_MAX_TOKENS` set.** OpenAI-compatible gateways reserve the model's entire output window up front unless a cap is given, which credit-limited accounts reject with `402 ... requires more credits, or fewer max_tokens`.
+Only the **LLM provider** and **Tavily** meter usage; the app, PostgreSQL and Gemini image generation have free tiers.
+
+| Component | When it bills | Rough cost |
+|---|---|---|
+| Kimi (`moonshot`) | Every agent call: router, research extraction, planner, one call per section, reducer | ~$0.06 per article (measured) |
+| Groq | Free tier, rate limited per minute / per day | $0 |
+| Gemini diagrams | Once per planned figure (needs `GOOGLE_API_KEY`) | Free tier, then per image |
+| Tavily research | Only on `hybrid` / `open_book` topics, ~5 searches per run | Free tier: 1,000 searches / month |
+| PostgreSQL | Checkpointer storage | Free tier on Neon / Supabase / Render |
+
+A measured run - a 2,553-word article on "How vector databases actually retrieve information" - consumed **8,940 input and 11,591 output tokens** across ~10 agent calls, which is **$0.055** at Kimi's `kimi-k2.6` rates. Research-heavy (`open_book`) topics push input tokens higher, since Tavily results are fed into the prompt.
+
+Output tokens dominate the bill at 4x the input rate, so `LLM_MAX_TOKENS` is the most effective cost lever. Kimi also charges only $0.16 / M for cached input, so repeated runs on similar topics cost less.
+
+> **Model IDs move.** Moonshot has already retired `kimi-k2-0905-preview`, and Groq dropped every Kimi model from its catalogue. If a run fails with a 404, check the provider's current model list and update `MOONSHOT_MODEL` / `GROQ_MODEL`.
+
+> **Keep `LLM_MAX_TOKENS` set.** OpenAI-compatible endpoints reserve the model's entire output window up front unless a cap is given, which low-balance accounts reject with HTTP 402.
 
 ---
 
@@ -166,16 +180,13 @@ Configure the following variables in `.env`:
 
 | Variable | Description | Required | Default |
 |---|---|:---:|---|
-| `LLM_PROVIDER` | LLM backend (`groq`, `openrouter`, `moonshot`, `gemini` or `openai`) | No | `groq` if `GROQ_API_KEY` is set |
+| `LLM_PROVIDER` | LLM backend (`moonshot`, `groq`, `gemini` or `openai`) | No | `moonshot` if `MOONSHOT_API_KEY` is set |
 | `LLM_MAX_TOKENS` | Max output tokens per agent call | No | `8000` |
-| `OPENROUTER_API_KEY` | OpenRouter key (serves Kimi K2) | Yes (if OpenRouter) | — |
-| `OPENROUTER_MODEL` | Kimi K2 model ID on OpenRouter | No | `moonshotai/kimi-k2-0905` |
+| `MOONSHOT_API_KEY` | Moonshot key serving Kimi (paid) | Yes (if Moonshot) | — |
+| `MOONSHOT_MODEL` | Kimi model ID on Moonshot | No | `kimi-k2.6` |
+| `MOONSHOT_BASE_URL` | OpenAI-compatible endpoint for Moonshot | No | `https://api.moonshot.ai/v1` |
 | `GROQ_API_KEY` | Groq key (no Kimi model available) | Yes (if Groq) | — |
 | `GROQ_MODEL` | Model ID on Groq | No | `openai/gpt-oss-120b` |
-| `OPENROUTER_BASE_URL` | OpenAI-compatible endpoint for OpenRouter | No | `https://openrouter.ai/api/v1` |
-| `MOONSHOT_API_KEY` | Moonshot platform key (paid, direct) | Yes (if Moonshot) | — |
-| `MOONSHOT_MODEL` | Kimi K2 model ID on Moonshot | No | `kimi-k2-0905-preview` |
-| `MOONSHOT_BASE_URL` | OpenAI-compatible endpoint for Moonshot | No | `https://api.moonshot.ai/v1` |
 | `GOOGLE_API_KEY` | Google AI key for Gemini reasoning & visual diagrams | Yes (if Gemini); optional otherwise | — |
 | `GEMINI_MODEL` | Gemini model for blog agents | No | `gemini-2.5-flash` |
 | `GEMINI_IMAGE_MODEL` | Gemini model for technical illustrations | No | `gemini-2.5-flash-image` |
@@ -250,12 +261,12 @@ This repository includes a native [`render.yaml`](render.yaml) blueprint:
 2. Link your repository in the [Render Dashboard](https://dashboard.render.com).
 3. Create a **New Blueprint Instance**.
 4. Configure your secret environment variables under **Service settings -> Environment -> Add Environment Variable**:
-   - `OPENROUTER_API_KEY` - your Kimi K2 key from [openrouter.ai](https://openrouter.ai) (never commit it to the repo)
+   - `MOONSHOT_API_KEY` - your Kimi key from [platform.moonshot.ai](https://platform.moonshot.ai) (never commit it to the repo)
    - `DATABASE_URL` - PostgreSQL connection URI
    - `GOOGLE_API_KEY` - optional, enables generated diagrams
    - `TAVILY_API_KEY` - optional, enables web research
 
-   `LLM_PROVIDER=openrouter`, `OPENROUTER_MODEL` and `LLM_MAX_TOKENS` are already set for you in [`render.yaml`](render.yaml).
+   `LLM_PROVIDER=moonshot`, `MOONSHOT_MODEL` and `LLM_MAX_TOKENS` are already set for you in [`render.yaml`](render.yaml).
 
 ---
 

@@ -27,16 +27,14 @@ def _optional(name: str, default: str = "") -> str:
 def _default_provider() -> str:
     """Pick a provider from whichever key is actually present.
 
-    OpenRouter wins when its key is set: it is the route that still serves
-    Kimi K2, which is the model this pipeline is tuned for. Groq is next -
-    it no longer lists any Kimi model, but it is free and fast.
+    Moonshot wins when its key is set: it serves Kimi directly, which is the
+    model this pipeline is tuned for. Groq is next - it carries no Kimi model,
+    but it is free and fast.
     """
-    if os.getenv("OPENROUTER_API_KEY"):
-        return "openrouter"
-    if os.getenv("GROQ_API_KEY"):
-        return "groq"
     if os.getenv("MOONSHOT_API_KEY"):
         return "moonshot"
+    if os.getenv("GROQ_API_KEY"):
+        return "groq"
     if os.getenv("GOOGLE_API_KEY") and not os.getenv("OPENAI_API_KEY"):
         return "gemini"
     return "openai"
@@ -58,24 +56,11 @@ class Settings:
         default_factory=lambda: _optional("GROQ_MODEL", "openai/gpt-oss-120b")
     )
 
-    # Kimi K2 (Moonshot) through OpenRouter - 256K context, strong tool use.
-    # The ":free" variant was retired; the paid slug below is inexpensive.
-    openrouter_api_key: str = field(
-        default_factory=lambda: _optional("OPENROUTER_API_KEY")
-    )
-    openrouter_model: str = field(
-        default_factory=lambda: _optional("OPENROUTER_MODEL", "moonshotai/kimi-k2-0905")
-    )
-    openrouter_base_url: str = field(
-        default_factory=lambda: _optional(
-            "OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"
-        )
-    )
-
-    # Kimi K2 straight from Moonshot (paid, OpenAI-compatible).
+    # Kimi straight from Moonshot (paid, OpenAI-compatible, 262K context).
+    # Current catalogue: https://platform.moonshot.ai/docs/pricing/chat
     moonshot_api_key: str = field(default_factory=lambda: _optional("MOONSHOT_API_KEY"))
     moonshot_model: str = field(
-        default_factory=lambda: _optional("MOONSHOT_MODEL", "kimi-k2-0905-preview")
+        default_factory=lambda: _optional("MOONSHOT_MODEL", "kimi-k2.6")
     )
     moonshot_base_url: str = field(
         default_factory=lambda: _optional(
@@ -127,7 +112,6 @@ class Settings:
     def __post_init__(self) -> None:
         required_key = {
             "groq": ("GROQ_API_KEY", self.groq_api_key),
-            "openrouter": ("OPENROUTER_API_KEY", self.openrouter_api_key),
             "moonshot": ("MOONSHOT_API_KEY", self.moonshot_api_key),
             "gemini": ("GOOGLE_API_KEY", self.google_api_key),
             "openai": ("OPENAI_API_KEY", self.openai_api_key),
@@ -136,7 +120,7 @@ class Settings:
         if required_key is None:
             raise ValueError(
                 f"Unsupported LLM_PROVIDER '{self.llm_provider}'. Supported values are "
-                "'groq', 'openrouter', 'moonshot', 'gemini' or 'openai'."
+                "'moonshot', 'groq', 'gemini' or 'openai'."
             )
 
         name, value = required_key
