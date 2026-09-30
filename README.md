@@ -16,7 +16,7 @@
 - **Intelligent Routing**: Dynamically classifies user prompts into *closed-book* (in-depth reasoning), *hybrid* (verification required), or *open-book* (breaking/fast-evolving topics requiring web search).
 - **Autonomous Deep Research**: Leverages **Tavily Search API** to fetch up-to-date facts, documentation, and industry benchmarks before drafting.
 - **Parallel Section Fan-Out**: The Orchestrator agent crafts a comprehensive blog outline and fans out section generation to parallel worker agents simultaneously.
-- **Reducer Subgraph & Visuals**: An editorial reducer agent stitches content seamlessly, audits the post for visual diagram opportunities, and generates technical visuals using **Google Gemini**.
+- **Reducer Subgraph & Visuals**: An editorial reducer agent stitches content seamlessly, audits the post for visual diagram opportunities, and draws technical diagrams for free: the LLM writes each figure as **Mermaid** code and **Kroki** renders it to PNG, so every label is exact (Gemini image generation remains available via `IMAGE_PROVIDER=gemini`).
 - **Kimi by Default**: Reasoning, planning and writing run on **Kimi (Moonshot)** with a 262K context window and excellent tool-use behaviour; Groq, Gemini and OpenAI remain drop-in alternatives.
 - **Real-Time SSE Streaming**: Live progress events, agent status updates, and tokens stream directly to the browser interface.
 - **Durable State Checkpointing**: Integrated PostgreSQL checkpointer preserves agent graph state across interrupts and execution steps.
@@ -46,7 +46,7 @@ flowchart TD
 
     subgraph ReducerSubgraph [Reducer Subgraph]
         Merge[Merge Content] --> Decide[Decide Diagrams & Images]
-        Decide --> Generate[Generate & Place Visuals\nGoogle Gemini]
+        Decide --> Generate[Generate & Place Visuals\nMermaid + Kroki]
     end
 
     ParallelWorkers --> ReducerSubgraph
@@ -148,13 +148,14 @@ If `LLM_PROVIDER` is not set, the provider is picked from whichever key is prese
 
 ### What each run costs
 
-Only the **LLM provider** and **Tavily** meter usage; the app, PostgreSQL and Gemini image generation have free tiers.
+Only the **LLM provider** and **Tavily** meter usage; the app, PostgreSQL and diagram rendering are free.
 
 | Component | When it bills | Rough cost |
 |---|---|---|
 | Kimi (`moonshot`) | Every agent call: router, research extraction, planner, one call per section, reducer | ~$0.06 per article (measured) |
 | Groq | Free tier, rate limited per minute / per day | $0 |
-| Gemini diagrams | Once per planned figure (needs `GOOGLE_API_KEY`) | Free tier, then per image |
+| Diagrams (`IMAGE_PROVIDER=mermaid`) | One small LLM call per figure + Kroki render | Free (Kroki is free and keyless) |
+| Diagrams (`IMAGE_PROVIDER=gemini`) | Once per planned figure (needs `GOOGLE_API_KEY`) | Free tier, then per image |
 | Tavily research | Only on `hybrid` / `open_book` topics, ~5 searches per run | Free tier: 1,000 searches / month |
 | PostgreSQL | Checkpointer storage | Free tier on Neon / Supabase / Render |
 
@@ -172,7 +173,7 @@ The pipeline makes five kinds of LLM call. Each can use its own model through `L
 | `RESEARCH` | Extract evidence from search results | Largest input | `openai/gpt-oss-120b` | `kimi-k2.6` |
 | `PLANNER` | Design the outline and section goals | Reasoning | `openai/gpt-oss-120b` | `kimi-k2.6` |
 | `WRITER` | Write each section (parallel) | Writing quality, most tokens | `openai/gpt-oss-120b` | `kimi-k2.6` |
-| `IMAGES` | Choose where diagrams go | Reads the whole article | skipped on free tier* | `kimi-k2.6` |
+| `IMAGES` | Choose where diagrams go, then write each as Mermaid | Reliable structure | `openai/gpt-oss-120b` | `kimi-k2.6` |
 
 **Why one model everywhere on Groq?** Each candidate was run through the full pipeline on the same research-heavy topic:
 
@@ -182,12 +183,27 @@ The pipeline makes five kinds of LLM call. Each can use its own model through `L
 | `openai/gpt-oss-20b` | Failed - produced a malformed tool call during research (`evidencePack` instead of `EvidencePack`) |
 | `qwen/qwen3.8-27b` | Failed - a reasoning model; spent ~2,700 tokens thinking in the first step and exhausted its per-minute budget |
 
-\*Groq's free tier caps every model at **8,000 tokens per minute, and a single request cannot exceed that.** The 131K context window is therefore not reachable on the free tier. A full article (~8K tokens) is larger than one request may be, so the image-planning step cannot read it. The run then publishes **without diagrams** rather than failing. With Kimi's 262K context the whole article fits in one request.
+\*Groq's free tier caps every model at **8,000 tokens per minute, and a single request cannot exceed that.** The 131K context window is therefore not reachable on the free tier. A full article (~8K tokens) is larger than one request may be, so image planning works from a compact outline instead: each heading plus its opening paragraph (~1K tokens).
 
 **Settings that make the free tier work** (already the defaults in `.env.example`):
 - `LLM_MAX_CONCURRENCY=2` - writes sections two at a time instead of all at once, so a run stays under 8K tokens/min. Set `0` (unlimited) on paid plans for full speed.
 - `LLM_MAX_RETRIES=6` - waits out the provider's `retry-after` window on HTTP 429.
 - `RESEARCH_MAX_RESULTS=24`, `RESEARCH_SNIPPET_CHARS=500` - dedupe, clip and cap search results before extraction. Without this, a topic that triggers research sent ~12K tokens in one request.
+
+### Diagrams: free, and why not an AI image model
+
+With the default `IMAGE_PROVIDER=mermaid`, the pipeline draws each figure in two steps:
+
+1. Your LLM writes it as [Mermaid](https://mermaid.js.org) code (flowchart, sequence, state, class or ER diagram).
+2. [Kroki](https://kroki.io) renders that to PNG. If Kroki is unreachable, [mermaid.ink](https://mermaid.ink) is used instead.
+
+Both renderers are free and need no key. The app's colour palette is applied automatically. If the Mermaid has a syntax error, the renderer's message goes back to the LLM for one repair pass.
+
+Free AI image models were tested for this and rejected. Asked for a labelled RAG pipeline diagram, Pollinations/Flux produced unreadable pseudo-text and meaningless shapes, which is the known weakness of diffusion models on diagrams. Mermaid labels come out exactly as written.
+
+Diagrams are prompted to lay out top-down, so they stay readable in the ~760px article column. A wide left-to-right layout of a 12-node architecture rendered 1642px wide and had to be shrunk to under half size.
+
+Set `IMAGE_PROVIDER=gemini` to use Gemini's image model instead (needs a working `GOOGLE_API_KEY`).
 
 > **Model IDs move.** Moonshot has already retired `kimi-k2-0905-preview`, and Groq dropped every Kimi model from its catalogue. If a run fails with a 404, check the provider's current model list and update `MOONSHOT_MODEL` / `GROQ_MODEL`.
 
@@ -217,7 +233,9 @@ Configure the following variables in `.env`:
 | `MOONSHOT_BASE_URL` | OpenAI-compatible endpoint for Moonshot | No | `https://api.moonshot.ai/v1` |
 | `GROQ_API_KEY` | Groq key (no Kimi model available) | Yes (if Groq) | — |
 | `GROQ_MODEL` | Model ID on Groq | No | `openai/gpt-oss-120b` |
-| `GOOGLE_API_KEY` | Google AI key for Gemini reasoning & visual diagrams | Yes (if Gemini); optional otherwise | — |
+| `IMAGE_PROVIDER` | How diagrams are drawn: `mermaid` (free) or `gemini` | No | `mermaid` |
+| `KROKI_URL` | Mermaid renderer (self-hostable) | No | `https://kroki.io` |
+| `GOOGLE_API_KEY` | Google AI key for Gemini reasoning, and diagrams when `IMAGE_PROVIDER=gemini` | Only for Gemini | — |
 | `GEMINI_MODEL` | Gemini model for blog agents | No | `gemini-2.5-flash` |
 | `GEMINI_IMAGE_MODEL` | Gemini model for technical illustrations | No | `gemini-2.5-flash-image` |
 | `OPENAI_API_KEY` | OpenAI API access key | Yes (if OpenAI) | — |
@@ -295,7 +313,7 @@ This repository includes a native [`render.yaml`](render.yaml) blueprint:
 4. Configure your secret environment variables under **Service settings -> Environment -> Add Environment Variable**:
    - `MOONSHOT_API_KEY` - your Kimi key from [platform.moonshot.ai](https://platform.moonshot.ai) (never commit it to the repo)
    - `DATABASE_URL` - PostgreSQL connection URI
-   - `GOOGLE_API_KEY` - optional, enables generated diagrams
+   - `GOOGLE_API_KEY` - only needed with `IMAGE_PROVIDER=gemini`; the default diagram renderer is free and keyless
    - `TAVILY_API_KEY` - optional, enables web research
 
    `LLM_PROVIDER=moonshot`, `MOONSHOT_MODEL` and `LLM_MAX_TOKENS` are already set for you in [`render.yaml`](render.yaml).

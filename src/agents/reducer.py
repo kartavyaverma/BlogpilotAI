@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import base64
 import logging
 import re
 from pathlib import Path
 
-from langchain_core.messages import HumanMessage, SystemMessage
+import requests
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langgraph.graph import END, START, StateGraph
 
 from core.config import settings
@@ -33,14 +35,59 @@ def merge_content(state: State) -> dict:
 DECIDE_IMAGES_SYSTEM = """You are an expert technical editor.
 Decide if images/diagrams are needed for THIS blog.
 
+You receive the blog's outline: every heading with its section's opening paragraph.
+
 Rules:
 - Max 3 images total.
 - Each image must materially improve understanding (diagram/flow/table-like visual).
-- Insert placeholders exactly: [[IMAGE_1]], [[IMAGE_2]], [[IMAGE_3]].
+- Insert placeholders exactly: [[IMAGE_1]], [[IMAGE_2]], [[IMAGE_3]] on their own line,
+  directly after the paragraph or heading they illustrate.
+- md_with_placeholders is the outline you received with the placeholders inserted.
 - If no images needed: md_with_placeholders must equal input and images=[].
 - Avoid decorative images; prefer technical diagrams with short labels.
+- Each image prompt must name the concrete components and how they connect
+  (the boxes, arrows and their labels), since it will be drawn as a diagram.
 Return strictly GlobalImagePlan.
 """
+
+
+def _outline_for_image_planning(md: str) -> str:
+    """Every heading plus the opening paragraph of its section.
+
+    Enough to decide where a diagram helps, at a fraction of the article's
+    size, so the request fits free-tier per-request limits. Code blocks are
+    skipped (a `#` comment inside one is not a heading).
+    """
+    out: list[str] = []
+    para: list[str] = []
+    in_code = False
+    want_para = False
+
+    for line in md.splitlines():
+        if line.lstrip().startswith("```"):
+            in_code = not in_code
+            if para:
+                out.append("\n".join(para))
+                para, want_para = [], False
+            continue
+        if in_code:
+            continue
+        if re.match(r"^#{1,6} ", line):
+            if para:
+                out.append("\n".join(para))
+            out.append(line)
+            para, want_para = [], True
+            continue
+        if want_para:
+            if line.strip():
+                para.append(line)
+            elif para:
+                out.append("\n".join(para))
+                para, want_para = [], False
+
+    if para:
+        out.append("\n".join(para))
+    return "\n\n".join(out)
 
 
 def decide_images(state: State) -> dict:
@@ -58,7 +105,7 @@ def decide_images(state: State) -> dict:
                         f"Blog kind: {plan.blog_kind}\n"
                         f"Topic: {state['topic']}\n\n"
                         "Insert placeholders + propose image prompts.\n\n"
-                        f"{merged_md}"
+                        f"{_outline_for_image_planning(merged_md)}"
                     )
                 ),
             ]
@@ -180,6 +227,95 @@ def _gemini_generate_image_bytes(prompt: str) -> bytes:
     raise RuntimeError("No inline image bytes found in response.")
 
 
+MERMAID_SYSTEM = """You draw technical diagrams as Mermaid code.
+
+Return ONLY the Mermaid source - no prose, no code fences.
+
+Rules:
+- Pick the type that fits: flowchart, sequenceDiagram, stateDiagram-v2,
+  classDiagram or erDiagram.
+- The diagram is shown in a narrow article column (~760px), so it must not be
+  wide: use `flowchart TD` (top-down). Use `flowchart LR` only for a single
+  short chain of 5 nodes or fewer.
+- Short node labels (about 5 words max). Put any label containing
+  punctuation, parentheses or special characters in double quotes.
+- At most about 12 nodes; show only what the description asks for.
+- No styling: no classDef, style, linkStyle or %%{init}%% directives.
+"""
+
+# Applied to every diagram so figures match the app's editorial palette.
+MERMAID_THEME = (
+    '%%{init: {"theme": "base", "themeVariables": {'
+    '"primaryColor": "#fcfbf9", "primaryBorderColor": "#b65f3a", '
+    '"primaryTextColor": "#171717", "lineColor": "#737373", '
+    '"secondaryColor": "#f5f3ef", "tertiaryColor": "#f7f5f0", '
+    '"fontFamily": "Helvetica, Arial, sans-serif"}}}%%\n'
+)
+
+
+def _clean_mermaid(text: str) -> str:
+    """Strip code fences and any init directive the model added anyway."""
+    fenced = re.search(r"```(?:mermaid)?\s*\n(.*?)```", text, re.S)
+    code = fenced.group(1) if fenced else text
+    lines = [ln for ln in code.strip().splitlines() if not ln.strip().startswith("%%{")]
+    return "\n".join(lines).strip()
+
+
+def _render_mermaid(code: str) -> bytes:
+    """Render Mermaid to PNG with Kroki, falling back to mermaid.ink if Kroki is unreachable.
+
+    Raises ValueError with the renderer's message when the code itself is invalid.
+    """
+    source = MERMAID_THEME + code
+    try:
+        resp = requests.post(
+            f"{settings.kroki_url.rstrip('/')}/mermaid/png",
+            data=source.encode("utf-8"),
+            headers={"Content-Type": "text/plain"},
+            timeout=60,
+        )
+    except requests.RequestException:
+        encoded = base64.urlsafe_b64encode(source.encode("utf-8")).decode("ascii")
+        resp = requests.get(f"https://mermaid.ink/img/{encoded}", params={"type": "png"}, timeout=60)
+
+    if resp.status_code == 400:
+        raise ValueError(resp.text[:500])
+    resp.raise_for_status()
+    if not resp.headers.get("content-type", "").startswith("image/"):
+        raise RuntimeError("Diagram renderer did not return an image.")
+    return resp.content
+
+
+def _mermaid_generate_image_bytes(prompt: str) -> bytes:
+    """Have the LLM write the diagram as Mermaid code, then render it.
+
+    Free and keyless, and unlike image-generation models the labels come out
+    exactly as written. A syntax error gets one repair pass with the
+    renderer's error message.
+    """
+    llm = get_llm("images")
+    messages = [SystemMessage(content=MERMAID_SYSTEM), HumanMessage(content=prompt)]
+    code = _clean_mermaid(str(llm.invoke(messages).content))
+
+    try:
+        return _render_mermaid(code)
+    except ValueError as err:
+        messages += [
+            AIMessage(content=code),
+            HumanMessage(
+                content=f"That Mermaid failed to render:\n{err}\n\nReturn corrected Mermaid only."
+            ),
+        ]
+        code = _clean_mermaid(str(llm.invoke(messages).content))
+        return _render_mermaid(code)
+
+
+def _generate_image_bytes(prompt: str) -> bytes:
+    if settings.image_provider == "gemini":
+        return _gemini_generate_image_bytes(prompt)
+    return _mermaid_generate_image_bytes(prompt)
+
+
 def generate_and_place_images(state: State) -> dict:
     plan = state["plan"]
     assert plan is not None
@@ -206,7 +342,7 @@ def generate_and_place_images(state: State) -> dict:
 
         if not out_path.exists():
             try:
-                img_bytes = _gemini_generate_image_bytes(spec["prompt"])
+                img_bytes = _generate_image_bytes(spec["prompt"])
                 out_path.write_bytes(img_bytes)
             except Exception as e:
                 prompt_block = (

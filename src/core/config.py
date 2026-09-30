@@ -100,6 +100,16 @@ class Settings:
         default_factory=lambda: _optional("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
     )
 
+    # How diagrams are drawn:
+    #   "mermaid" - the LLM writes Mermaid code, Kroki renders it (free, no key)
+    #   "gemini"  - Gemini image model (needs GOOGLE_API_KEY)
+    image_provider: str = field(
+        default_factory=lambda: _optional("IMAGE_PROVIDER", "mermaid").lower()
+    )
+    kroki_url: str = field(
+        default_factory=lambda: _optional("KROKI_URL", "https://kroki.io")
+    )
+
     tavily_api_key: str = field(default_factory=lambda: _optional("TAVILY_API_KEY"))
     tavily_max_results: int = field(
         default_factory=lambda: int(_optional("TAVILY_MAX_RESULTS", "6"))

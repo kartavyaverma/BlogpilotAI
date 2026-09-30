@@ -25,7 +25,10 @@ services:
         sync: false
       - key: GEMINI_MODEL
         value: gemini-2.5-flash
-      # Still used for generating diagrams, even when Kimi K2 writes the article.
+      # Diagrams are drawn free via Mermaid + Kroki; GOOGLE_API_KEY is only
+      # needed if you switch to IMAGE_PROVIDER=gemini.
+      - key: IMAGE_PROVIDER
+        value: mermaid
       - key: GOOGLE_API_KEY
         sync: false
       - key: DATABASE_URL
