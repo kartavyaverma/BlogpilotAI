@@ -17,7 +17,7 @@
 - **Autonomous Deep Research**: Leverages **Tavily Search API** to fetch up-to-date facts, documentation, and industry benchmarks before drafting.
 - **Parallel Section Fan-Out**: The Orchestrator agent crafts a comprehensive blog outline and fans out section generation to parallel worker agents simultaneously.
 - **Reducer Subgraph & Visuals**: An editorial reducer agent stitches content seamlessly, audits the post for visual diagram opportunities, and draws technical diagrams for free: the LLM writes each figure as **Mermaid** code and **Kroki** renders it to PNG, so every label is exact (Gemini image generation remains available via `IMAGE_PROVIDER=gemini`).
-- **Kimi by Default**: Reasoning, planning and writing run on **Kimi (Moonshot)** with a 262K context window and excellent tool-use behaviour; Groq, Gemini and OpenAI remain drop-in alternatives.
+- **Free by Default, Kimi for Quality**: Runs for $0 on **Groq** (`openai/gpt-oss-120b`), tested end to end. Switch to **Kimi (Moonshot)** (262K context, ~$0.06 per article) for the best results. Gemini and OpenAI remain drop-in alternatives, and each agent task can use its own model.
 - **Real-Time SSE Streaming**: Live progress events, agent status updates, and tokens stream directly to the browser interface.
 - **Durable State Checkpointing**: Integrated PostgreSQL checkpointer preserves agent graph state across interrupts and execution steps.
 - **Clean Architecture**: Strictly separated concerns (Core, Schemas, Agents, Graph Topology, API Routes, and UI Assets).
@@ -129,9 +129,9 @@ BlogPilot-AI/
 - **Python**: 3.11 or higher
 - **PostgreSQL**: Required for state checkpointing (use a local instance, Docker, or managed service such as Supabase / Neon / Render Postgres)
 - **API Keys**:
-  - `MOONSHOT_API_KEY`: **Recommended.** Runs **Kimi** straight from Moonshot - 262K context and excellent agent/tool use, which is what this graph relies on. Get one at [platform.moonshot.ai](https://platform.moonshot.ai) -> *API Keys*. **Paid: there is no free tier, the account needs a balance**
-  - `GROQ_API_KEY`: Free fallback and the fastest option, but **Groq serves no Kimi model** - it runs `openai/gpt-oss-120b` here instead. [console.groq.com](https://console.groq.com) -> *API Keys*
-  - `GOOGLE_API_KEY`: Required if using Gemini (`LLM_PROVIDER=gemini`), **and for visual diagram generation with any provider**. Without it, articles are still generated and diagrams are skipped
+  - `GROQ_API_KEY`: **Free, and the default.** Runs `openai/gpt-oss-120b` (Groq serves no Kimi model). [console.groq.com](https://console.groq.com) -> *API Keys*
+  - `MOONSHOT_API_KEY`: **Best quality.** Runs **Kimi** straight from Moonshot - 262K context and excellent agent/tool use. [platform.moonshot.ai](https://platform.moonshot.ai) -> *API Keys*. **Paid: there is no free tier, the account needs a balance**
+  - `GOOGLE_API_KEY`: Only if using Gemini (`LLM_PROVIDER=gemini` or `IMAGE_PROVIDER=gemini`). Diagrams are free and keyless by default
   - `OPENAI_API_KEY`: Required if using OpenAI (`LLM_PROVIDER=openai`)
   - `TAVILY_API_KEY`: Required for online research and fact-finding (open/hybrid mode)
 
@@ -140,7 +140,7 @@ BlogPilot-AI/
 | Provider | `LLM_PROVIDER` | Default model | Context | Cost |
 |---|---|---|---|---|
 | **Moonshot** (best quality, Kimi) | `moonshot` | `kimi-k2.6` | 262K | Paid only - $0.95 / M input, $4.00 / M output |
-| **Groq** (free, tested) | `groq` | `openai/gpt-oss-120b` | 131K nominal, **8K tokens/min on free tier** | Free (1,000 requests/day per model) |
+| **Groq** (free, tested) | `groq` | `openai/gpt-oss-120b` | 131K nominal, **8K tokens/min on free tier** | Free: 200K tokens/day per model (~6 articles/day) |
 | Google Gemini | `gemini` | `gemini-2.5-flash` | 1M | Free tier / paid |
 | OpenAI | `openai` | `gpt-4o-mini` | 128K | Paid |
 
@@ -153,7 +153,7 @@ Only the **LLM provider** and **Tavily** meter usage; the app, PostgreSQL and di
 | Component | When it bills | Rough cost |
 |---|---|---|
 | Kimi (`moonshot`) | Every agent call: router, research extraction, planner, one call per section, reducer | ~$0.06 per article (measured) |
-| Groq | Free tier, rate limited per minute / per day | $0 |
+| Groq | Free tier: 8K tokens/minute and 200K tokens/day per model (~6 articles/day at ~30K tokens each) | $0 |
 | Diagrams (`IMAGE_PROVIDER=mermaid`) | One small LLM call per figure + Kroki render | Free (Kroki is free and keyless) |
 | Diagrams (`IMAGE_PROVIDER=gemini`) | Once per planned figure (needs `GOOGLE_API_KEY`) | Free tier, then per image |
 | Tavily research | Only on `hybrid` / `open_book` topics, ~5 searches per run | Free tier: 1,000 searches / month |
@@ -311,12 +311,14 @@ This repository includes a native [`render.yaml`](render.yaml) blueprint:
 2. Link your repository in the [Render Dashboard](https://dashboard.render.com).
 3. Create a **New Blueprint Instance**.
 4. Configure your secret environment variables under **Service settings -> Environment -> Add Environment Variable**:
-   - `MOONSHOT_API_KEY` - your Kimi key from [platform.moonshot.ai](https://platform.moonshot.ai) (never commit it to the repo)
+   - `GROQ_API_KEY` - your free key from [console.groq.com](https://console.groq.com) (never commit it to the repo)
    - `DATABASE_URL` - PostgreSQL connection URI
    - `GOOGLE_API_KEY` - only needed with `IMAGE_PROVIDER=gemini`; the default diagram renderer is free and keyless
    - `TAVILY_API_KEY` - optional, enables web research
 
-   `LLM_PROVIDER=moonshot`, `MOONSHOT_MODEL` and `LLM_MAX_TOKENS` are already set for you in [`render.yaml`](render.yaml).
+   `LLM_PROVIDER=groq`, `GROQ_MODEL`, `LLM_MAX_TOKENS`, `LLM_MAX_CONCURRENCY=2` and `IMAGE_PROVIDER=mermaid` are already set for you in [`render.yaml`](render.yaml).
+
+   To switch to Kimi: add `MOONSHOT_API_KEY`, then set `LLM_PROVIDER=moonshot` and `LLM_MAX_CONCURRENCY=0` in the Render dashboard.
 
 ---
 

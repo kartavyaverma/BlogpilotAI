@@ -85,8 +85,6 @@ def save_final_markdown(run_id: str, markdown: str) -> Path:
 def stream_workflow(topic: str, run_id: str) -> Generator[str, None, None]:
     config = {"configurable": {"thread_id": run_id}}
     if settings.llm_max_concurrency:
-        # Writes sections a few at a time so free tiers stay under their
-        # tokens-per-minute budget instead of bursting past it.
         config["max_concurrency"] = settings.llm_max_concurrency
     workflow_input = {"topic": topic, "sections": []}
 

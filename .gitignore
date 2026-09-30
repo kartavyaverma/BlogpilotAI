@@ -50,6 +50,5 @@ desktop.ini
 *.swo
 *~
 
-# AI tool files
 .prompt
 .claude

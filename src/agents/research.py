@@ -44,13 +44,6 @@ def _tavily_search(query: str, max_results: int) -> List[dict]:
 def _compact_results(
     per_query: List[List[dict]], snippet_chars: int, max_total: int
 ) -> List[dict]:
-    """Dedupe by URL, clip snippets and cap the total before extraction.
-
-    Overlapping queries return the same pages, and full page snippets make the
-    extraction prompt large enough to exceed free-tier per-request limits.
-    Results are interleaved across queries so the cap keeps every query
-    represented instead of dropping the last ones.
-    """
     interleaved: List[dict] = []
     for rank in range(max((len(rs) for rs in per_query), default=0)):
         for rs in per_query:

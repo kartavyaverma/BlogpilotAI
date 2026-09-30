@@ -27,7 +27,6 @@ app.mount("/images", StaticFiles(directory=str(settings.images_dir)), name="imag
 
 app.include_router(pages.router)
 app.include_router(health.router)
-# BlogPilot AI FastAPI Application
 app.include_router(runs.router)
 
 

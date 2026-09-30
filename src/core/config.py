@@ -25,12 +25,6 @@ def _optional(name: str, default: str = "") -> str:
 
 
 def _default_provider() -> str:
-    """Pick a provider from whichever key is actually present.
-
-    Moonshot wins when its key is set: it serves Kimi directly, which is the
-    model this pipeline is tuned for. Groq is next - it carries no Kimi model,
-    but it is free and fast.
-    """
     if os.getenv("MOONSHOT_API_KEY"):
         return "moonshot"
     if os.getenv("GROQ_API_KEY"):
@@ -49,15 +43,11 @@ class Settings:
         ).lower()
     )
 
-    # Groq: free and very fast, but it no longer serves any Kimi model.
-    # Check the current catalogue at https://console.groq.com/docs/models
     groq_api_key: str = field(default_factory=lambda: _optional("GROQ_API_KEY"))
     groq_model: str = field(
         default_factory=lambda: _optional("GROQ_MODEL", "openai/gpt-oss-120b")
     )
 
-    # Kimi straight from Moonshot (paid, OpenAI-compatible, 262K context).
-    # Current catalogue: https://platform.moonshot.ai/docs/pricing/chat
     moonshot_api_key: str = field(default_factory=lambda: _optional("MOONSHOT_API_KEY"))
     moonshot_model: str = field(
         default_factory=lambda: _optional("MOONSHOT_MODEL", "kimi-k2.6")
@@ -75,19 +65,12 @@ class Settings:
     llm_temperature: float = field(
         default_factory=lambda: float(_optional("LLM_TEMPERATURE", "0"))
     )
-    # Caps the response length per agent call. Without a cap, OpenAI-compatible
-    # gateways reserve the model's full output window up front, which credit
-    # limited accounts reject with "requires more credits, or fewer max_tokens".
     llm_max_tokens: int = field(
         default_factory=lambda: int(_optional("LLM_MAX_TOKENS", "8000"))
     )
-    # Retries on 429 rate limits. The SDKs honour the provider's retry-after
-    # header, so free tiers wait out the per-minute window instead of failing
-    # when parallel section writers burst past it.
     llm_max_retries: int = field(
         default_factory=lambda: int(_optional("LLM_MAX_RETRIES", "6"))
     )
-    # Max agent calls in flight at once; 0 means unlimited (full parallel fan-out).
     llm_max_concurrency: int = field(
         default_factory=lambda: int(_optional("LLM_MAX_CONCURRENCY", "0"))
     )
@@ -100,9 +83,6 @@ class Settings:
         default_factory=lambda: _optional("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
     )
 
-    # How diagrams are drawn:
-    #   "mermaid" - the LLM writes Mermaid code, Kroki renders it (free, no key)
-    #   "gemini"  - Gemini image model (needs GOOGLE_API_KEY)
     image_provider: str = field(
         default_factory=lambda: _optional("IMAGE_PROVIDER", "mermaid").lower()
     )
@@ -114,17 +94,13 @@ class Settings:
     tavily_max_results: int = field(
         default_factory=lambda: int(_optional("TAVILY_MAX_RESULTS", "6"))
     )
-    # Search snippets are clipped to this many characters before extraction.
     research_snippet_chars: int = field(
         default_factory=lambda: int(_optional("RESEARCH_SNIPPET_CHARS", "500"))
     )
-    # Upper bound on unique sources handed to the extractor in one request.
     research_max_results: int = field(
         default_factory=lambda: int(_optional("RESEARCH_MAX_RESULTS", "24"))
     )
 
-    # Optional per-agent model overrides, e.g. LLM_MODEL_WRITER=... Any task left
-    # unset uses the provider's default model. All tasks share one provider/key.
     task_models: dict = field(
         default_factory=lambda: {
             task: _optional(f"LLM_MODEL_{task.upper()}")

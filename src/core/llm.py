@@ -6,7 +6,6 @@ from langchain_core.language_models.chat_models import BaseChatModel
 
 from core.config import settings
 
-# Agent tasks that can each be pointed at their own model via LLM_MODEL_<TASK>.
 TASKS = ("router", "research", "planner", "writer", "images")
 
 
@@ -20,7 +19,6 @@ def _default_model() -> str:
 
 
 def model_for(task: str | None) -> str:
-    """Resolve the model for a task: its LLM_MODEL_<TASK> override, else the provider default."""
     return settings.task_models.get(task or "", "") or _default_model()
 
 

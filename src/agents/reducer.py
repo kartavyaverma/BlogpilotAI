@@ -17,7 +17,6 @@ logger = logging.getLogger("blogpilot.reducer")
 
 
 def _sanitize_filename(title: str) -> str:
-    """Strip filesystem-unsafe characters from blog_title for use as a filename."""
     sanitized = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "-", title)
     sanitized = sanitized.strip(". ")
     return sanitized[:200] or "blog"
@@ -52,12 +51,6 @@ Return strictly GlobalImagePlan.
 
 
 def _outline_for_image_planning(md: str) -> str:
-    """Every heading plus the opening paragraph of its section.
-
-    Enough to decide where a diagram helps, at a fraction of the article's
-    size, so the request fits free-tier per-request limits. Code blocks are
-    skipped (a `#` comment inside one is not a heading).
-    """
     out: list[str] = []
     para: list[str] = []
     in_code = False
@@ -111,8 +104,6 @@ def decide_images(state: State) -> dict:
             ]
         )
     except Exception:
-        # Diagrams are optional; a failure here must not discard the article
-        # the writers already produced.
         logger.warning("Image planning failed; publishing without diagrams.", exc_info=True)
         return {"md_with_placeholders": merged_md, "image_specs": []}
 
@@ -129,7 +120,6 @@ def decide_images(state: State) -> dict:
 
 
 def _section_end(md: str, heading_pos: int, level: int) -> int:
-    """Index where the section starting at heading_pos ends (next heading of the same or higher level)."""
     pattern = re.compile(rf"^#{{1,{level}}} ", re.M)
     line_end = md.find("\n", heading_pos)
     if line_end == -1:
@@ -139,16 +129,6 @@ def _section_end(md: str, heading_pos: int, level: int) -> int:
 
 
 def _place_placeholders(original: str, llm_md: str, specs: list[dict]) -> tuple[str, list[dict]]:
-    """Insert image placeholders into the untouched merged article.
-
-    The model is asked to return the whole article with placeholders, but when
-    it copies ~3k words back it can truncate ("... remaining sections unchanged
-    ...") or silently reword. So its copy is used only to learn *where* each
-    placeholder goes: after the paragraph it followed, else at the end of its
-    section. The article text itself always comes from the writers.
-    Specs that cannot be anchored are dropped, so no image is generated for a
-    slot that would never be shown.
-    """
     md = original
     kept: list[dict] = []
 
@@ -243,7 +223,6 @@ Rules:
 - No styling: no classDef, style, linkStyle or %%{init}%% directives.
 """
 
-# Applied to every diagram so figures match the app's editorial palette.
 MERMAID_THEME = (
     '%%{init: {"theme": "base", "themeVariables": {'
     '"primaryColor": "#fcfbf9", "primaryBorderColor": "#b65f3a", '
@@ -254,7 +233,6 @@ MERMAID_THEME = (
 
 
 def _clean_mermaid(text: str) -> str:
-    """Strip code fences and any init directive the model added anyway."""
     fenced = re.search(r"```(?:mermaid)?\s*\n(.*?)```", text, re.S)
     code = fenced.group(1) if fenced else text
     lines = [ln for ln in code.strip().splitlines() if not ln.strip().startswith("%%{")]
@@ -262,10 +240,6 @@ def _clean_mermaid(text: str) -> str:
 
 
 def _render_mermaid(code: str) -> bytes:
-    """Render Mermaid to PNG with Kroki, falling back to mermaid.ink if Kroki is unreachable.
-
-    Raises ValueError with the renderer's message when the code itself is invalid.
-    """
     source = MERMAID_THEME + code
     try:
         resp = requests.post(
@@ -287,12 +261,6 @@ def _render_mermaid(code: str) -> bytes:
 
 
 def _mermaid_generate_image_bytes(prompt: str) -> bytes:
-    """Have the LLM write the diagram as Mermaid code, then render it.
-
-    Free and keyless, and unlike image-generation models the labels come out
-    exactly as written. A syntax error gets one repair pass with the
-    renderer's error message.
-    """
     llm = get_llm("images")
     messages = [SystemMessage(content=MERMAID_SYSTEM), HumanMessage(content=prompt)]
     code = _clean_mermaid(str(llm.invoke(messages).content))

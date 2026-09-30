@@ -7,7 +7,6 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.10
-      # Free setup. For Kimi: LLM_PROVIDER=moonshot, LLM_MAX_CONCURRENCY=0
       - key: LLM_PROVIDER
         value: groq
       - key: GROQ_MODEL
@@ -18,15 +17,12 @@ services:
         value: 2
       - key: MOONSHOT_MODEL
         value: kimi-k2.6
-      # Set these in the Render dashboard: Environment -> Add Environment Variable
       - key: GROQ_API_KEY
         sync: false
       - key: MOONSHOT_API_KEY
         sync: false
       - key: GEMINI_MODEL
         value: gemini-2.5-flash
-      # Diagrams are drawn free via Mermaid + Kroki; GOOGLE_API_KEY is only
-      # needed if you switch to IMAGE_PROVIDER=gemini.
       - key: IMAGE_PROVIDER
         value: mermaid
       - key: GOOGLE_API_KEY
@@ -37,4 +33,3 @@ services:
         sync: false
       - key: OPENAI_API_KEY
         sync: false
-

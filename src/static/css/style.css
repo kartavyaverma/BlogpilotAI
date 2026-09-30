@@ -1,8 +1,3 @@
-/* ==========================================================
-   Editorial Craft — BlogPilot
-   Warm archival paper, hairline rules, terracotta accent.
-   ========================================================== */
-
 :root {
     --canvas: #f7f5f0;
     --surface: #fcfbf9;
@@ -50,7 +45,6 @@
 }
 
 
-/* Keep the `hidden` attribute authoritative over component display rules. */
 [hidden] {
     display: none !important;
 }
@@ -107,13 +101,10 @@ button {
 }
 
 
-/* Decorative glows are retired in this design system. */
 .background-glow {
     display: none;
 }
 
-
-/* ---------- Layout ---------- */
 
 .app-layout {
     display: grid;
@@ -357,8 +348,6 @@ button {
 }
 
 
-/* ---------- Topbar ---------- */
-
 .topbar {
     display: flex;
     align-items: flex-end;
@@ -450,8 +439,6 @@ button {
     border-color: var(--danger-border);
 }
 
-
-/* ---------- Cards ---------- */
 
 .composer-card,
 .panel-card {
@@ -696,8 +683,6 @@ textarea::placeholder {
     color: var(--danger);
 }
 
-
-/* ---------- Workspace ---------- */
 
 .workspace-grid {
     display: grid;
@@ -1131,8 +1116,6 @@ textarea::placeholder {
 }
 
 
-/* ---------- Result ---------- */
-
 .result-card {
     margin-top: 24px;
     padding: 24px 40px 40px;
@@ -1417,8 +1400,6 @@ textarea::placeholder {
 }
 
 
-/* ---------- Empty states ---------- */
-
 .empty-state {
     min-height: 230px;
 
@@ -1468,8 +1449,6 @@ textarea::placeholder {
 }
 
 
-/* ---------- Toast ---------- */
-
 .toast {
     position: fixed;
     right: 24px;
@@ -1506,8 +1485,6 @@ textarea::placeholder {
 }
 
 
-/* ---------- Motion ---------- */
-
 @keyframes spin {
     to {
         transform: rotate(360deg);
@@ -1537,8 +1514,6 @@ textarea::placeholder {
     }
 }
 
-
-/* ---------- Responsive ---------- */
 
 @media (max-width: 1279px) {
     .main-content {
