@@ -6,30 +6,14 @@ services:
     startCommand: cd src && uvicorn app:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.10
+        value: 3.12.7
       - key: LLM_PROVIDER
         value: groq
-      - key: GROQ_MODEL
-        value: openai/gpt-oss-120b
-      - key: LLM_MAX_TOKENS
-        value: 8000
-      - key: LLM_MAX_CONCURRENCY
-        value: 2
-      - key: MOONSHOT_MODEL
-        value: kimi-k2.6
       - key: GROQ_API_KEY
         sync: false
       - key: MOONSHOT_API_KEY
         sync: false
-      - key: GEMINI_MODEL
-        value: gemini-2.5-flash
-      - key: IMAGE_PROVIDER
-        value: mermaid
-      - key: GOOGLE_API_KEY
-        sync: false
-      - key: DATABASE_URL
-        sync: false
       - key: TAVILY_API_KEY
         sync: false
-      - key: OPENAI_API_KEY
+      - key: DATABASE_URL
         sync: false

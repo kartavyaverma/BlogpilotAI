@@ -16,12 +16,6 @@ from schemas.models import GlobalImagePlan, State
 logger = logging.getLogger("blogpilot.reducer")
 
 
-def _sanitize_filename(title: str) -> str:
-    sanitized = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "-", title)
-    sanitized = sanitized.strip(". ")
-    return sanitized[:200] or "blog"
-
-
 def merge_content(state: State) -> dict:
     plan = state["plan"]
 
@@ -166,47 +160,6 @@ def _place_placeholders(original: str, llm_md: str, specs: list[dict]) -> tuple[
     return md, kept
 
 
-def _gemini_generate_image_bytes(prompt: str) -> bytes:
-    from google import genai
-    from google.genai import types
-
-    if not settings.google_api_key:
-        raise RuntimeError("GOOGLE_API_KEY is not set.")
-
-    client = genai.Client(api_key=settings.google_api_key)
-
-    resp = client.models.generate_content(
-        model=settings.gemini_image_model,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_modalities=["IMAGE"],
-            safety_settings=[
-                types.SafetySetting(
-                    category="HARM_CATEGORY_DANGEROUS_CONTENT",
-                    threshold="BLOCK_ONLY_HIGH",
-                )
-            ],
-        ),
-    )
-
-    parts = getattr(resp, "parts", None)
-    if not parts and getattr(resp, "candidates", None):
-        try:
-            parts = resp.candidates[0].content.parts
-        except Exception:
-            parts = None
-
-    if not parts:
-        raise RuntimeError("No image content returned (safety/quota/SDK change).")
-
-    for part in parts:
-        inline = getattr(part, "inline_data", None)
-        if inline and getattr(inline, "data", None):
-            return inline.data
-
-    raise RuntimeError("No inline image bytes found in response.")
-
-
 MERMAID_SYSTEM = """You draw technical diagrams as Mermaid code.
 
 Return ONLY the Mermaid source - no prose, no code fences.
@@ -278,12 +231,6 @@ def _mermaid_generate_image_bytes(prompt: str) -> bytes:
         return _render_mermaid(code)
 
 
-def _generate_image_bytes(prompt: str) -> bytes:
-    if settings.image_provider == "gemini":
-        return _gemini_generate_image_bytes(prompt)
-    return _mermaid_generate_image_bytes(prompt)
-
-
 def generate_and_place_images(state: State) -> dict:
     plan = state["plan"]
     assert plan is not None
@@ -310,7 +257,7 @@ def generate_and_place_images(state: State) -> dict:
 
         if not out_path.exists():
             try:
-                img_bytes = _generate_image_bytes(spec["prompt"])
+                img_bytes = _mermaid_generate_image_bytes(spec["prompt"])
                 out_path.write_bytes(img_bytes)
             except Exception as e:
                 prompt_block = (

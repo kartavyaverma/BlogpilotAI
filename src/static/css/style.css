@@ -101,11 +101,6 @@ button {
 }
 
 
-.background-glow {
-    display: none;
-}
-
-
 .app-layout {
     display: grid;
     grid-template-columns:

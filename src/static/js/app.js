@@ -25,8 +25,6 @@ const markdownTab = document.getElementById("markdownTab");
 const copyButton = document.getElementById("copyButton");
 const downloadButton = document.getElementById("downloadButton");
 
-const healthDot = document.getElementById("healthDot");
-const healthText = document.getElementById("healthText");
 const toast = document.getElementById("toast");
 
 let abortController = null;

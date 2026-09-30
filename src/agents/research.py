@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import List
 
-from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import HumanMessage, SystemMessage
+from tavily import TavilyClient
 
 from core.config import settings
 from core.llm import get_llm
@@ -24,11 +24,11 @@ Rules:
 
 
 def _tavily_search(query: str, max_results: int) -> List[dict]:
-    tool = TavilySearchResults(max_results=max_results)
-    results = tool.invoke({"query": query})
+    client = TavilyClient(api_key=settings.tavily_api_key)
+    response = client.search(query, search_depth="advanced", max_results=max_results)
 
     normalized: List[dict] = []
-    for r in results or []:
+    for r in response.get("results") or []:
         normalized.append(
             {
                 "title": r.get("title") or "",

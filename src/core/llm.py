@@ -6,16 +6,11 @@ from langchain_core.language_models.chat_models import BaseChatModel
 
 from core.config import settings
 
-TASKS = ("router", "research", "planner", "writer", "images")
-
 
 def _default_model() -> str:
-    return {
-        "groq": settings.groq_model,
-        "moonshot": settings.moonshot_model,
-        "gemini": settings.gemini_model,
-        "openai": settings.openai_model,
-    }[settings.llm_provider]
+    if settings.llm_provider == "moonshot":
+        return settings.moonshot_model
+    return settings.groq_model
 
 
 def model_for(task: str | None) -> str:
@@ -25,17 +20,6 @@ def model_for(task: str | None) -> str:
 @lru_cache(maxsize=None)
 def get_llm(task: str | None = None) -> BaseChatModel:
     model = model_for(task)
-
-    if settings.llm_provider == "groq":
-        from langchain_groq import ChatGroq
-
-        return ChatGroq(
-            model=model,
-            temperature=settings.llm_temperature,
-            max_retries=settings.llm_max_retries,
-            max_tokens=settings.llm_max_tokens,
-            api_key=settings.groq_api_key,
-        )
 
     if settings.llm_provider == "moonshot":
         from langchain_openai import ChatOpenAI
@@ -49,21 +33,12 @@ def get_llm(task: str | None = None) -> BaseChatModel:
             base_url=settings.moonshot_base_url,
         )
 
-    if settings.llm_provider == "gemini":
-        from langchain_google_genai import ChatGoogleGenerativeAI
+    from langchain_groq import ChatGroq
 
-        return ChatGoogleGenerativeAI(
-            model=model,
-            temperature=settings.llm_temperature,
-            max_retries=settings.llm_max_retries,
-            google_api_key=settings.google_api_key,
-        )
-
-    from langchain_openai import ChatOpenAI
-
-    return ChatOpenAI(
+    return ChatGroq(
         model=model,
         temperature=settings.llm_temperature,
         max_retries=settings.llm_max_retries,
-        api_key=settings.openai_api_key,
+        max_tokens=settings.llm_max_tokens,
+        api_key=settings.groq_api_key,
     )

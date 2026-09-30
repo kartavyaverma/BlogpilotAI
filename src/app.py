@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 
-import uvicorn
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
@@ -28,12 +27,3 @@ app.mount("/images", StaticFiles(directory=str(settings.images_dir)), name="imag
 app.include_router(pages.router)
 app.include_router(health.router)
 app.include_router(runs.router)
-
-
-if __name__ == "__main__":
-    uvicorn.run(
-        "app:app",
-        host=settings.app_host,
-        port=settings.app_port,
-        reload=settings.app_reload,
-    )

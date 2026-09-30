@@ -60,9 +60,7 @@ class ImageSpec(BaseModel):
     filename: str = Field(..., description="Image filename only (without directory), e.g. qkv_flow.png")
     alt: str
     caption: str
-    prompt: str = Field(..., description="Prompt to send to the image model.")
-    size: Literal["1024x1024", "1024x1536", "1536x1024"] = "1024x1024"
-    quality: Literal["low", "medium", "high"] = "medium"
+    prompt: str = Field(..., description="Diagram description: the components and how they connect.")
 
 
 class GlobalImagePlan(BaseModel):
