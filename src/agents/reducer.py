@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import re
 from pathlib import Path
 
@@ -9,6 +10,8 @@ from langgraph.graph import END, START, StateGraph
 from core.config import settings
 from core.llm import get_llm
 from schemas.models import GlobalImagePlan, State
+
+logger = logging.getLogger("blogpilot.reducer")
 
 
 def _sanitize_filename(title: str) -> str:
@@ -41,29 +44,99 @@ Return strictly GlobalImagePlan.
 
 
 def decide_images(state: State) -> dict:
-    planner = get_llm().with_structured_output(GlobalImagePlan)
+    planner = get_llm("images").with_structured_output(GlobalImagePlan)
     merged_md = state["merged_md"]
     plan = state["plan"]
     assert plan is not None
 
-    image_plan = planner.invoke(
-        [
-            SystemMessage(content=DECIDE_IMAGES_SYSTEM),
-            HumanMessage(
-                content=(
-                    f"Blog kind: {plan.blog_kind}\n"
-                    f"Topic: {state['topic']}\n\n"
-                    "Insert placeholders + propose image prompts.\n\n"
-                    f"{merged_md}"
-                )
-            ),
-        ]
+    try:
+        image_plan = planner.invoke(
+            [
+                SystemMessage(content=DECIDE_IMAGES_SYSTEM),
+                HumanMessage(
+                    content=(
+                        f"Blog kind: {plan.blog_kind}\n"
+                        f"Topic: {state['topic']}\n\n"
+                        "Insert placeholders + propose image prompts.\n\n"
+                        f"{merged_md}"
+                    )
+                ),
+            ]
+        )
+    except Exception:
+        # Diagrams are optional; a failure here must not discard the article
+        # the writers already produced.
+        logger.warning("Image planning failed; publishing without diagrams.", exc_info=True)
+        return {"md_with_placeholders": merged_md, "image_specs": []}
+
+    md, specs = _place_placeholders(
+        merged_md,
+        image_plan.md_with_placeholders,
+        [img.model_dump() for img in image_plan.images],
     )
 
     return {
-        "md_with_placeholders": image_plan.md_with_placeholders,
-        "image_specs": [img.model_dump() for img in image_plan.images],
+        "md_with_placeholders": md,
+        "image_specs": specs,
     }
+
+
+def _section_end(md: str, heading_pos: int, level: int) -> int:
+    """Index where the section starting at heading_pos ends (next heading of the same or higher level)."""
+    pattern = re.compile(rf"^#{{1,{level}}} ", re.M)
+    line_end = md.find("\n", heading_pos)
+    if line_end == -1:
+        return len(md)
+    nxt = pattern.search(md, line_end + 1)
+    return nxt.start() if nxt else len(md)
+
+
+def _place_placeholders(original: str, llm_md: str, specs: list[dict]) -> tuple[str, list[dict]]:
+    """Insert image placeholders into the untouched merged article.
+
+    The model is asked to return the whole article with placeholders, but when
+    it copies ~3k words back it can truncate ("... remaining sections unchanged
+    ...") or silently reword. So its copy is used only to learn *where* each
+    placeholder goes: after the paragraph it followed, else at the end of its
+    section. The article text itself always comes from the writers.
+    Specs that cannot be anchored are dropped, so no image is generated for a
+    slot that would never be shown.
+    """
+    md = original
+    kept: list[dict] = []
+
+    for spec in specs:
+        placeholder = spec.get("placeholder", "")
+        idx = llm_md.find(placeholder) if placeholder else -1
+        if idx == -1:
+            continue
+
+        before = llm_md[:idx].rstrip()
+        insert_at = -1
+
+        preceding_block = before.split("\n\n")[-1].strip()
+        if preceding_block and not preceding_block.startswith("[[IMAGE_"):
+            pos = md.find(preceding_block)
+            if pos != -1:
+                insert_at = pos + len(preceding_block)
+
+        if insert_at == -1:
+            headings = list(re.finditer(r"^(#{1,6}) .+$", before, re.M))
+            if headings:
+                heading = headings[-1]
+                pos = md.find(heading.group(0))
+                if pos != -1:
+                    insert_at = _section_end(md, pos, len(heading.group(1)))
+
+        if insert_at == -1:
+            continue
+
+        head = md[:insert_at].rstrip()
+        tail = md[insert_at:].lstrip("\n")
+        md = f"{head}\n\n{placeholder}\n\n{tail}"
+        kept.append(spec)
+
+    return md, kept
 
 
 def _gemini_generate_image_bytes(prompt: str) -> bytes:

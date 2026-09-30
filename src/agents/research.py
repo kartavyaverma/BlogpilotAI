@@ -41,18 +41,54 @@ def _tavily_search(query: str, max_results: int) -> List[dict]:
     return normalized
 
 
+def _compact_results(
+    per_query: List[List[dict]], snippet_chars: int, max_total: int
+) -> List[dict]:
+    """Dedupe by URL, clip snippets and cap the total before extraction.
+
+    Overlapping queries return the same pages, and full page snippets make the
+    extraction prompt large enough to exceed free-tier per-request limits.
+    Results are interleaved across queries so the cap keeps every query
+    represented instead of dropping the last ones.
+    """
+    interleaved: List[dict] = []
+    for rank in range(max((len(rs) for rs in per_query), default=0)):
+        for rs in per_query:
+            if rank < len(rs):
+                interleaved.append(rs[rank])
+
+    seen: set[str] = set()
+    compact: List[dict] = []
+    for r in interleaved:
+        url = r.get("url") or ""
+        if not url or url in seen:
+            continue
+        seen.add(url)
+        snippet = r.get("snippet") or ""
+        if len(snippet) > snippet_chars:
+            snippet = snippet[:snippet_chars].rsplit(" ", 1)[0] + "..."
+        compact.append({**r, "snippet": snippet})
+        if len(compact) >= max_total:
+            break
+    return compact
+
+
 def research_node(state: State) -> dict:
     queries = state.get("queries", []) or []
     max_results = settings.tavily_max_results
 
-    raw_results: List[dict] = []
-    for q in queries:
-        raw_results.extend(_tavily_search(q, max_results=max_results))
+    per_query = [_tavily_search(q, max_results=max_results) for q in queries]
+
+    raw_results = _compact_results(
+        per_query,
+        settings.research_snippet_chars,
+        settings.research_max_results,
+    )
 
     if not raw_results:
         return {"evidence": []}
 
-    extractor = get_llm().with_structured_output(EvidencePack)
+    extractor = get_llm("research").with_structured_output(EvidencePack)
     pack = extractor.invoke(
         [
             SystemMessage(content=RESEARCH_SYSTEM),

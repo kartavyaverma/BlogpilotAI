@@ -26,7 +26,7 @@ If needs_research=true:
 
 def router_node(state: State) -> dict:
     topic = state["topic"]
-    decider = get_llm().with_structured_output(RouterDecision)
+    decider = get_llm("router").with_structured_output(RouterDecision)
     decision = decider.invoke(
         [
             SystemMessage(content=ROUTER_SYSTEM),

@@ -43,7 +43,7 @@ Output must strictly match the Plan schema.
 
 
 def orchestrator_node(state: State) -> dict:
-    planner = get_llm().with_structured_output(Plan)
+    planner = get_llm("planner").with_structured_output(Plan)
 
     evidence = state.get("evidence", [])
     mode = state.get("mode", "closed_book")

@@ -81,6 +81,16 @@ class Settings:
     llm_max_tokens: int = field(
         default_factory=lambda: int(_optional("LLM_MAX_TOKENS", "8000"))
     )
+    # Retries on 429 rate limits. The SDKs honour the provider's retry-after
+    # header, so free tiers wait out the per-minute window instead of failing
+    # when parallel section writers burst past it.
+    llm_max_retries: int = field(
+        default_factory=lambda: int(_optional("LLM_MAX_RETRIES", "6"))
+    )
+    # Max agent calls in flight at once; 0 means unlimited (full parallel fan-out).
+    llm_max_concurrency: int = field(
+        default_factory=lambda: int(_optional("LLM_MAX_CONCURRENCY", "0"))
+    )
 
     gemini_model: str = field(
         default_factory=lambda: _optional("GEMINI_MODEL", "gemini-2.5-flash")
@@ -93,6 +103,23 @@ class Settings:
     tavily_api_key: str = field(default_factory=lambda: _optional("TAVILY_API_KEY"))
     tavily_max_results: int = field(
         default_factory=lambda: int(_optional("TAVILY_MAX_RESULTS", "6"))
+    )
+    # Search snippets are clipped to this many characters before extraction.
+    research_snippet_chars: int = field(
+        default_factory=lambda: int(_optional("RESEARCH_SNIPPET_CHARS", "500"))
+    )
+    # Upper bound on unique sources handed to the extractor in one request.
+    research_max_results: int = field(
+        default_factory=lambda: int(_optional("RESEARCH_MAX_RESULTS", "24"))
+    )
+
+    # Optional per-agent model overrides, e.g. LLM_MODEL_WRITER=... Any task left
+    # unset uses the provider's default model. All tasks share one provider/key.
+    task_models: dict = field(
+        default_factory=lambda: {
+            task: _optional(f"LLM_MODEL_{task.upper()}")
+            for task in ("router", "research", "planner", "writer", "images")
+        }
     )
 
     database_url_raw: str = field(default_factory=lambda: _require("DATABASE_URL"))

@@ -139,8 +139,8 @@ BlogPilot-AI/
 
 | Provider | `LLM_PROVIDER` | Default model | Context | Cost |
 |---|---|---|---|---|
-| **Moonshot** (recommended, Kimi) | `moonshot` | `kimi-k2.6` | 262K | Paid only - $0.95 / M input, $4.00 / M output |
-| Groq (fastest, free - no Kimi) | `groq` | `openai/gpt-oss-120b` | 128K | Free tier (per-minute / per-day limits) |
+| **Moonshot** (best quality, Kimi) | `moonshot` | `kimi-k2.6` | 262K | Paid only - $0.95 / M input, $4.00 / M output |
+| **Groq** (free, tested) | `groq` | `openai/gpt-oss-120b` | 131K nominal, **8K tokens/min on free tier** | Free (1,000 requests/day per model) |
 | Google Gemini | `gemini` | `gemini-2.5-flash` | 1M | Free tier / paid |
 | OpenAI | `openai` | `gpt-4o-mini` | 128K | Paid |
 
@@ -162,6 +162,33 @@ A measured run - a 2,553-word article on "How vector databases actually retrieve
 
 Output tokens dominate the bill at 4x the input rate, so `LLM_MAX_TOKENS` is the most effective cost lever. Kimi also charges only $0.16 / M for cached input, so repeated runs on similar topics cost less.
 
+### Choosing models per task
+
+The pipeline makes five kinds of LLM call. Each can use its own model through `LLM_MODEL_<TASK>`; any task left unset uses the provider's default model.
+
+| Task (`LLM_MODEL_…`) | What it does | What matters | Free: Groq | Paid: Kimi |
+|---|---|---|---|---|
+| `ROUTER` | Classify the topic, write search queries | Reliable JSON, speed | `openai/gpt-oss-120b` | `kimi-k2.6` |
+| `RESEARCH` | Extract evidence from search results | Largest input | `openai/gpt-oss-120b` | `kimi-k2.6` |
+| `PLANNER` | Design the outline and section goals | Reasoning | `openai/gpt-oss-120b` | `kimi-k2.6` |
+| `WRITER` | Write each section (parallel) | Writing quality, most tokens | `openai/gpt-oss-120b` | `kimi-k2.6` |
+| `IMAGES` | Choose where diagrams go | Reads the whole article | skipped on free tier* | `kimi-k2.6` |
+
+**Why one model everywhere on Groq?** Each candidate was run through the full pipeline on the same research-heavy topic:
+
+| Groq model | Result |
+|---|---|
+| `openai/gpt-oss-120b` | **Completed** - 7/7 sections, 2,210 words, 8 code samples, ~4 min with `LLM_MAX_CONCURRENCY=2` |
+| `openai/gpt-oss-20b` | Failed - produced a malformed tool call during research (`evidencePack` instead of `EvidencePack`) |
+| `qwen/qwen3.8-27b` | Failed - a reasoning model; spent ~2,700 tokens thinking in the first step and exhausted its per-minute budget |
+
+\*Groq's free tier caps every model at **8,000 tokens per minute, and a single request cannot exceed that.** The 131K context window is therefore not reachable on the free tier. A full article (~8K tokens) is larger than one request may be, so the image-planning step cannot read it. The run then publishes **without diagrams** rather than failing. With Kimi's 262K context the whole article fits in one request.
+
+**Settings that make the free tier work** (already the defaults in `.env.example`):
+- `LLM_MAX_CONCURRENCY=2` - writes sections two at a time instead of all at once, so a run stays under 8K tokens/min. Set `0` (unlimited) on paid plans for full speed.
+- `LLM_MAX_RETRIES=6` - waits out the provider's `retry-after` window on HTTP 429.
+- `RESEARCH_MAX_RESULTS=24`, `RESEARCH_SNIPPET_CHARS=500` - dedupe, clip and cap search results before extraction. Without this, a topic that triggers research sent ~12K tokens in one request.
+
 > **Model IDs move.** Moonshot has already retired `kimi-k2-0905-preview`, and Groq dropped every Kimi model from its catalogue. If a run fails with a 404, check the provider's current model list and update `MOONSHOT_MODEL` / `GROQ_MODEL`.
 
 > **Keep `LLM_MAX_TOKENS` set.** OpenAI-compatible endpoints reserve the model's entire output window up front unless a cap is given, which low-balance accounts reject with HTTP 402.
@@ -182,6 +209,9 @@ Configure the following variables in `.env`:
 |---|---|:---:|---|
 | `LLM_PROVIDER` | LLM backend (`moonshot`, `groq`, `gemini` or `openai`) | No | `moonshot` if `MOONSHOT_API_KEY` is set |
 | `LLM_MAX_TOKENS` | Max output tokens per agent call | No | `8000` |
+| `LLM_MAX_RETRIES` | Retries on HTTP 429 (honours `retry-after`) | No | `6` |
+| `LLM_MAX_CONCURRENCY` | Agent calls in flight at once; `0` = unlimited | No | `0` |
+| `LLM_MODEL_ROUTER` / `_RESEARCH` / `_PLANNER` / `_WRITER` / `_IMAGES` | Per-task model override | No | provider default |
 | `MOONSHOT_API_KEY` | Moonshot key serving Kimi (paid) | Yes (if Moonshot) | — |
 | `MOONSHOT_MODEL` | Kimi model ID on Moonshot | No | `kimi-k2.6` |
 | `MOONSHOT_BASE_URL` | OpenAI-compatible endpoint for Moonshot | No | `https://api.moonshot.ai/v1` |
@@ -196,6 +226,8 @@ Configure the following variables in `.env`:
 | `DATABASE_URL` | PostgreSQL connection URI for state checkpointing | **Yes** | `postgresql://user:pass@localhost:5432/blogpilot` |
 | `TAVILY_API_KEY` | Tavily Search API key for research agent | No* | — (*Required for hybrid/open search) |
 | `TAVILY_MAX_RESULTS` | Number of web search results per query | No | `6` |
+| `RESEARCH_SNIPPET_CHARS` | Max characters kept per search snippet | No | `500` |
+| `RESEARCH_MAX_RESULTS` | Max unique sources sent to the research model | No | `24` |
 | `APP_HOST` | FastAPI server bind host | No | `127.0.0.1` |
 | `APP_PORT` | FastAPI server bind port | No | `8000` |
 | `APP_RELOAD` | Enable hot reloading in development | No | `true` |

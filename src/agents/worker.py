@@ -53,7 +53,7 @@ def worker_node(payload: dict) -> dict:
             for e in evidence[:20]
         )
 
-    response = get_llm().invoke(
+    response = get_llm("writer").invoke(
         [
             SystemMessage(content=WORKER_SYSTEM),
             HumanMessage(
